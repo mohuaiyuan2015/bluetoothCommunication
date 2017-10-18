@@ -94,7 +94,9 @@ public class MainActivity extends AppCompatActivity {
         bluetoothUtils.setTAG(TAG);
         checkBleSupportAndInitialize();
         bluetoothUtils.setDiscoverableTimeout(120);
-        getBondedDevices();
+
+        //mohuaiyuan 注释掉 不使用 这个方法了
+//        getBondedDevices();
 
 
         initListener();
@@ -110,6 +112,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initData() {
+
+        Intent intent=getIntent();
+        Bundle bundle=intent.getExtras();
+        bluetoothDevice= (BluetoothDevice) bundle.get(ConstantString.BLUETUUTH_DEVICE);
+
 //        orders =new ArrayList<>();
 //        String[] temp=getResources().getStringArray(R.array.orders);
 //        for (int i=0;i<temp.length;i++){
@@ -138,6 +145,7 @@ public class MainActivity extends AppCompatActivity {
         deviceRecyclerView.setLayoutManager(linearLayoutManager);
         bluetoothDeviceAdapter=new BluetoothDeviceAdapter(bluetoothDevices);
         deviceRecyclerView.setAdapter(bluetoothDeviceAdapter);
+
 
 
     }
@@ -210,7 +218,7 @@ public class MainActivity extends AppCompatActivity {
 
                     Log.d(TAG, "onItemClick position: "+position);
                     int data=position;
-                    if (position==9){
+                    if ((position+1)==dataList.size()){
                         data=100;
                     }
                     Log.d(TAG, "data: "+data);

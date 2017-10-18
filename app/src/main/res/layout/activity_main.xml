@@ -30,6 +30,7 @@
         android:layout_height="wrap_content"
         android:text="startDiscovery"
         android:textAllCaps="false"
+        android:visibility="gone"
         />
 
 
