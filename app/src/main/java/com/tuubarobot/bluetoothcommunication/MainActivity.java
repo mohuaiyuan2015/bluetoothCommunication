@@ -30,9 +30,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
@@ -55,7 +57,10 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private RecyclerView deviceRecyclerView;
 
-    private List<Integer> orders;
+//    private List<Integer> orders;
+    private List<String> questions;
+    private List<String> answers;
+    private List<Map<String,String>> dataList;
     private MyAdapter myAdapter;
 
     private List<BluetoothDevice> bluetoothDevices;
@@ -105,20 +110,32 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initData() {
-        orders =new ArrayList<>();
-        String[] temp=getResources().getStringArray(R.array.orders);
-        for (int i=0;i<temp.length;i++){
-            Integer integer=Integer.valueOf(temp[i]);
-            orders.add(integer);
+//        orders =new ArrayList<>();
+//        String[] temp=getResources().getStringArray(R.array.orders);
+//        for (int i=0;i<temp.length;i++){
+//            Integer integer=Integer.valueOf(temp[i]);
+//            orders.add(integer);
+//        }
+
+        dataList=new ArrayList<>();
+        String []questionTemp=getResources().getStringArray(R.array.questionArray);
+        String []answerTemp=getResources().getStringArray(R.array.answerArray);
+        for (int i=0;i<questionTemp.length;i++){
+            Map<String,String>map=new HashMap<>();
+            map.put(ConstantString.QUESTION,questionTemp[i]);
+            map.put(ConstantString.ANSWER,answerTemp[i]);
+            dataList.add(map);
         }
 
-        LinearLayoutManager llm = new LinearLayoutManager(this);
+        LinearLayoutManager llm = new LinearLayoutManager(context);
         recyclerView.setLayoutManager(llm);
 
-        myAdapter = new MyAdapter(orders);
+        myAdapter = new MyAdapter(dataList);
         recyclerView.setAdapter(myAdapter);
 
         bluetoothDevices=new ArrayList<>();
+        LinearLayoutManager linearLayoutManager=new LinearLayoutManager(context);
+        deviceRecyclerView.setLayoutManager(linearLayoutManager);
         bluetoothDeviceAdapter=new BluetoothDeviceAdapter(bluetoothDevices);
         deviceRecyclerView.setAdapter(bluetoothDeviceAdapter);
 
@@ -160,6 +177,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "startDiscovery.setOnClickListener onClick: ");
+                if (!bluetoothDevices.isEmpty()){
+                    bluetoothDevices.clear();
+                    refreshBluetoothData();
+                }
                 startDiscovery();
 
             }
@@ -186,9 +207,14 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(View itemView, int position) {
                 Log.d(TAG, "myAdapter onItemClick: ");
                 try {
-                    Integer integer=orders.get(position);
-                    Log.d(TAG, "onItemClick: "+integer);
-                    outputStream.write(String.valueOf(position+1).getBytes());
+
+                    Log.d(TAG, "onItemClick position: "+position);
+                    int data=position;
+                    if (position==9){
+                        data=100;
+                    }
+                    Log.d(TAG, "data: "+data);
+                    outputStream.write(String.valueOf(data).getBytes());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -402,7 +428,8 @@ public class MainActivity extends AppCompatActivity {
                 if (!TextUtils.isEmpty(device.getName()) && !device.getName().equalsIgnoreCase("null")) {
                     Log.d(TAG, "onReceive : device address-"+device.getAddress()+" device name-"+device.getName());
                     bluetoothDevices.add(device);
-                    bluetoothDeviceAdapter.notifyDataSetChanged();
+                    Log.d(TAG, "bluetoothDevices.size(): "+bluetoothDevices.size());
+                    refreshBluetoothData();
                 }
             } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
                 context.unregisterReceiver(mReceiver);
@@ -413,5 +440,10 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    private void refreshBluetoothData(){
+        if (bluetoothDeviceAdapter != null) {
+            bluetoothDeviceAdapter.notifyDataSetChanged();
+        }
+    }
 
 }

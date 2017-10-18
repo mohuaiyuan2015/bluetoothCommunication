@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by YF-04 on 2017/7/22.
@@ -17,11 +18,11 @@ import java.util.List;
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     private static final String TAG = "MyAdapter";
-    private List<Integer> list;
+    private List<Map<String,String>> list;
 
     private OnItemClickListener onItemClickListener;
 
-    public MyAdapter(List<Integer>list){
+    public MyAdapter(List<Map<String,String>>list){
         this.list=list;
 
     }
@@ -46,11 +47,13 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
     static class ViewHolder extends RecyclerView.ViewHolder{
 
-        TextView tvOrder;
+        TextView question;
+        TextView answer;
 
         public ViewHolder(final View view) {
             super(view);
-            tvOrder= (TextView) view.findViewById(R.id.orderTextView);
+            question= (TextView) view.findViewById(R.id.questionTextView);
+            answer= (TextView) view.findViewById(R.id.answerTextView);
         }
     }
 
@@ -81,9 +84,10 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
         cellViewHolder.itemView.setTag(position);
 
-        Integer integer=list.get(position);
+        Map<String,String>map=list.get(position);
+        holder.question.setText(map.get(ConstantString.QUESTION));
+        holder.answer.setText(map.get(ConstantString.ANSWER));
 
-        holder.tvOrder.setText("机器人语音序列："+integer);
 
     }
 

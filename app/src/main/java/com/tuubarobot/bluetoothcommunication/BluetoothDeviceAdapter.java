@@ -69,7 +69,6 @@ public class BluetoothDeviceAdapter extends RecyclerView.Adapter<BluetoothDevice
         });
 
 
-
         return viewHolder;
     }
 
@@ -82,8 +81,8 @@ public class BluetoothDeviceAdapter extends RecyclerView.Adapter<BluetoothDevice
 
         BluetoothDevice bluetoothDevice=list.get(position);
 
-        holder.name.setText(bluetoothDevice.getName());
-        holder.address.setText(bluetoothDevice.getAddress());
+        holder.name.setText("蓝牙名称："+bluetoothDevice.getName());
+        holder.address.setText("蓝牙地址"+bluetoothDevice.getAddress());
 
     }
 

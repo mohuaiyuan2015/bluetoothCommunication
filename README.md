@@ -1,2 +1,0 @@
-# bluetoothCommunication
-android手机通过蓝牙进行通讯

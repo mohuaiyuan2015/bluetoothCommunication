@@ -14,6 +14,7 @@ public class BluetoothUtils {
     private   String TAG = "BluetoothUtils";
     private BluetoothAdapter mBluetoothAdapter;
 
+
     public BluetoothUtils(){
         if (mBluetoothAdapter==null){
             mBluetoothAdapter=BluetoothAdapter.getDefaultAdapter();
