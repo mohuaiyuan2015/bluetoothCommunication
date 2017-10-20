@@ -61,7 +61,9 @@ public class BluetoothUtils {
         }
     }
 
-
+    /**
+     * 开启蓝牙并且开启蓝牙可见性
+     */
     public void openBluetooth() {
         Log.d(TAG, "openBluetooth: ");
         if (mBluetoothAdapter!=null){
@@ -86,7 +88,22 @@ public class BluetoothUtils {
             }
         }
 
+    }
 
+    /**
+     * 关闭蓝牙
+     */
+    public void closeBluetooth(){
+        Log.d(TAG, "closeBluetooth: ");
+        if (mBluetoothAdapter!=null){
+            if (mBluetoothAdapter.isEnabled()){
+                mBluetoothAdapter.disable();
+            }else {
+                Log.d(TAG, "蓝牙已经关闭: ");
+            }
+        }else {
+            Log.e(TAG, "mBluetoothAdapter==null: ");
+        }
     }
 
     public String getTAG() {
