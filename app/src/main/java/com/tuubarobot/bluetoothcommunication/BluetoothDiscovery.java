@@ -18,8 +18,6 @@ import android.util.Log;
 public class BluetoothDiscovery {
     private static final String TAG = "BluetoothDiscovery";
 
-    private String pin = "1234";  //此处为你要连接的蓝牙设备的初始密钥，一般为1234或0000
-
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothDiscoveryListener discoveryListener;
 
@@ -51,7 +49,6 @@ public class BluetoothDiscovery {
             IntentFilter filter = new IntentFilter();
             filter.addAction(BluetoothDevice.ACTION_FOUND);
             filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-            filter.addAction(BluetoothDevice.ACTION_PAIRING_REQUEST);
             context.registerReceiver(mReceiver, filter);
 
             mBluetoothAdapter.startDiscovery();
@@ -120,19 +117,6 @@ public class BluetoothDiscovery {
 //                if (mBtDeviceListener != null) {
 //                    mBtDeviceListener.onStopScan();
 //                }
-            }else if (BluetoothDevice.ACTION_PAIRING_REQUEST.equals(action)){
-                Log.d(TAG, "action: BluetoothDevice.ACTION_PAIRING_REQUEST ....配对广播.");
-                try {
-                    //1.确认配对
-                    ClsUtils.setPairingConfirmation(device.getClass(), device, true);
-                    //2.终止有序广播
-                    abortBroadcast();//如果没有将广播终止，则会出现一个一闪而过的配对框。
-                    //3.调用setPin方法进行配对...
-                    boolean ret = ClsUtils.setPin(device.getClass(), device, pin);
-                } catch (Exception e) {
-                    Log.d(TAG, "配对广播: "+e.getMessage());
-                    e.printStackTrace();
-                }
             }
         }
     };

@@ -39,6 +39,7 @@ public class IndexActivity extends AppCompatActivity {
 
     private Context context;
 
+    private Button startDiscovery;
     private Button getBoundDevicesBtn;
 
     private int sdkInt=-1;
@@ -98,17 +99,23 @@ public class IndexActivity extends AppCompatActivity {
     private void initListener() {
         Log.d(TAG, "initListener: ");
 
+        startDiscovery.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "startDiscovery.setOnClickListener onClick: ");
+                startDiscovery();
+                
+            }
+        });
+
         getBoundDevicesBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "getBoundDevicesBtn.setOnClickListener onClick: ");
-                //方式一
-                //mohuaiyuan 获取 已经绑定(配对)的 蓝牙
-//                getBondedDevices();
 
-                //方式二
-                //mohuaiyuan 扫描蓝牙
-                startDiscovery();
+                //mohuaiyuan 获取 已经绑定(配对)的 蓝牙
+                getBondedDevices();
+
             }
         });
 
@@ -167,19 +174,22 @@ public class IndexActivity extends AppCompatActivity {
     }
 
     private void initUI() {
-        boundDeviceRecyclerView= (RecyclerView) findViewById(R.id.boundDeviceRecyclerView);
+
+        startDiscovery= (Button) findViewById(R.id.startDiscovery);
         getBoundDevicesBtn= (Button) findViewById(R.id.getBoundDevicesBtn);
+        boundDeviceRecyclerView= (RecyclerView) findViewById(R.id.boundDeviceRecyclerView);
     }
 
 
     private void getBondedDevices(){
         Log.d(TAG, "getBondedDevices: ");
 
-        if (!bluetoothDevices.isEmpty()){
-            bluetoothDevices.clear();
-            Log.d(TAG, "getBondedDevices:clear.... ");
-            refreshBluetoothData();
-        }
+        //清空 蓝牙列表
+//        if (!bluetoothDevices.isEmpty()){
+//            bluetoothDevices.clear();
+//            Log.d(TAG, "getBondedDevices:clear.... ");
+//            refreshBluetoothData();
+//        }
 
         devices = mBluetoothAdapter.getBondedDevices();
         Log.d(TAG, "bonded device size ="+devices.size());
@@ -283,5 +293,32 @@ public class IndexActivity extends AppCompatActivity {
         }
         bluetoothDiscovery.startDiscovery();
     }
+
+ /* * ━━━━━━感觉萌萌哒━━━━━━
+ * 　　　　　　　　┏┓　　　┏┓
+ * 　　　　　　　┏┛┻━━━┛┻┓
+ * 　　　　　　　┃　　　　　　　┃ 　
+ * 　　　　　　　┃　　　━　　　┃
+ * 　　　　　　　┃　＞　　　＜　┃
+ * 　　　　　　　┃　　　　　　　┃
+ * 　　　　　　　┃...　⌒　...　┃
+ * 　　　　　　　┃　　　　　　　┃
+ * 　　　　　　　┗━┓　　　┏━┛
+ * 　　　　　　　　　┃　　　┃　Code is far away from bug with the animal protecting　　　　　　　　　　
+ * 　　　　　　　　　┃　　　┃       神兽保佑,代码无bug
+ * 　　　　　　　　　┃　　　┃　　　　　　　　　　　
+ * 　　　　　　　　　┃　　　┃ 　　　　　　
+ * 　　　　　　　　　┃　　　┃
+ * 　　　　　　　　　┃　　　┃　　　　　　　　　　　
+ * 　　　　　　　　　┃　　　┗━━━┓
+ * 　　　　　　　　　┃　　　　　　　┣┓
+ * 　　　　　　　　　┃　　　　　　　┏┛
+ * 　　　　　　　　　┗┓┓┏━┳┓┏┛
+ * 　　　　　　　　　　┃┫┫　┃┫┫
+ * 　　　　　　　　　　┗┻┛　┗┻┛
+ *
+ */
+
+
 
 }
