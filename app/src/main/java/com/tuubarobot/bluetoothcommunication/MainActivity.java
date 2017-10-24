@@ -221,9 +221,10 @@ public class MainActivity extends AppCompatActivity {
                     if ((position+1)==dataList.size()){
                         data=100;
                     }
-                    Log.d(TAG, "data: "+data);
+                    Log.d(TAG, "发送的数据: "+data);
                     outputStream.write(String.valueOf(data).getBytes());
                 } catch (IOException e) {
+                    Log.d(TAG, "发送数据出现 IOException : "+e.getMessage());
                     e.printStackTrace();
                 }
             }
