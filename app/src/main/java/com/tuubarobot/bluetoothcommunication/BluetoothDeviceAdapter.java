@@ -45,11 +45,13 @@ public class BluetoothDeviceAdapter extends RecyclerView.Adapter<BluetoothDevice
 
         TextView address;
         TextView name;
+        TextView boundState;
 
         public ViewHolder(final View view) {
             super(view);
             name= (TextView) view.findViewById(R.id.name);
             address= (TextView) view.findViewById(R.id.address);
+            boundState= (TextView) view.findViewById(R.id.boundState);
         }
     }
 
@@ -83,6 +85,7 @@ public class BluetoothDeviceAdapter extends RecyclerView.Adapter<BluetoothDevice
 
         holder.name.setText("蓝牙名称："+bluetoothDevice.getName());
         holder.address.setText("蓝牙地址"+bluetoothDevice.getAddress());
+        holder.boundState.setText("Bound State"+bluetoothDevice.getBondState());
 
     }
 

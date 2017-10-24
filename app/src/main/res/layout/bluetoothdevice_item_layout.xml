@@ -19,6 +19,13 @@
         android:paddingBottom="10dip"
         android:textSize="20sp"
         />
+    <TextView
+        android:id="@+id/boundState"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="10dip"
+        android:textSize="20sp"
+        />
     <View
         android:layout_width="match_parent"
         android:layout_height="2dip"

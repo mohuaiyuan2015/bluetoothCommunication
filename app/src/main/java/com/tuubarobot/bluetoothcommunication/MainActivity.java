@@ -75,6 +75,8 @@ public class MainActivity extends AppCompatActivity {
 
     private List<String> list=new LinkedList<>();
 
+    private BluetoothDiscovery bluetoothDiscovery;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
         //mohuaiyuan 注释掉 不使用 这个方法了
 //        getBondedDevices();
 
+        bluetoothDiscovery=new BluetoothDiscovery(context);
 
         initListener();
 
@@ -181,6 +184,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        bluetoothDiscovery.setDiscoveryListener(new BluetoothDiscovery.BluetoothDiscoveryListener() {
+            @Override
+            public void discovery(BluetoothDevice bluetoothDevice) {
+                bluetoothDevices.add(bluetoothDevice);
+                refreshBluetoothData();
+
+            }
+        });
+
         startDiscovery.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -189,7 +201,7 @@ public class MainActivity extends AppCompatActivity {
                     bluetoothDevices.clear();
                     refreshBluetoothData();
                 }
-                startDiscovery();
+                bluetoothDiscovery.startDiscovery();
 
             }
         });
@@ -364,90 +376,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    /**
-     * 开始扫描
-     */
-    public void startDiscovery() {
-        Log.d(TAG, "startDiscovery: ");
-        if (mHandler != null) {
-            mHandler.removeMessages(MSG_STOP_SCAN);
-        }
-        if (mBluetoothAdapter != null) {
-            if (mBluetoothAdapter.isDiscovering()) {
-                mBluetoothAdapter.cancelDiscovery();
-            }
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(BluetoothDevice.ACTION_FOUND);
-            filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-            context.registerReceiver(mReceiver, filter);
 
-            mBluetoothAdapter.startDiscovery();
-//            if (mBtDeviceListener != null) {
-//                mBtDeviceListener.onStartScan();
-//            }
-            if (mHandler != null) {
-                mHandler.sendEmptyMessageDelayed(MSG_STOP_SCAN, 12000);
-            }
-        }
-    }
 
-    /**
-     * 取消扫描
-     */
-    public void cancelDiscovery() {
-        Log.d(TAG, "cancelDiscovery: ");
-        if (mBluetoothAdapter != null) {
-            if (mBluetoothAdapter.isDiscovering()) {
-                mBluetoothAdapter.cancelDiscovery();
-            }
-        }
-    }
 
-    public final static int MSG_STOP_SCAN      = 0xc06;//停止扫描
-    private Handler mHandler=new Handler(){
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            if (msg!=null){
-                switch (msg.what){
-                    case MSG_STOP_SCAN://停止扫描
-                        cancelDiscovery();
-                        break;
 
-                    default:
-                }
-            }
-        }
-    };
 
-    /**
-     * 蓝牙广播接受者
-     */
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (BuildConfig.DEBUG) {
-                Log.d(TAG, "action:" + action);
-            }
-            // 发现一个设备
-            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                // 获取设备对象
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                if (!TextUtils.isEmpty(device.getName()) && !device.getName().equalsIgnoreCase("null")) {
-                    Log.d(TAG, "onReceive : device address-"+device.getAddress()+" device name-"+device.getName());
-                    bluetoothDevices.add(device);
-                    Log.d(TAG, "bluetoothDevices.size(): "+bluetoothDevices.size());
-                    refreshBluetoothData();
-                }
-            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                context.unregisterReceiver(mReceiver);
-//                if (mBtDeviceListener != null) {
-//                    mBtDeviceListener.onStopScan();
-//                }
-            }
-        }
-    };
+
 
     private void refreshBluetoothData(){
         if (bluetoothDeviceAdapter != null) {
