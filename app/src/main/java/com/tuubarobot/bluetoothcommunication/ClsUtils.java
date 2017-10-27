@@ -49,7 +49,9 @@ public class ClsUtils {
 
     }
 
-    // 取消用户输入
+    /**
+     *       取消用户输入
+      */
     static public boolean cancelPairingUserInput(Class<?> btClass, BluetoothDevice device) throws Exception {
         Method createBondMethod = btClass.getMethod("cancelPairingUserInput");
 //        cancelBondProcess(btClass, device);

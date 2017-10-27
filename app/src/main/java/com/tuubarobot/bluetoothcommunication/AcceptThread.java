@@ -170,6 +170,23 @@ public class AcceptThread extends Thread {
 
     public void close(){
         isLoop=false;
+        try {
+            if (socket!=null){
+                socket.close();
+            }
+
+        } catch (IOException e) {
+            Log.d(TAG, "socket.close() : IOException e:"+e.getMessage());
+            e.printStackTrace();
+        }
+        try {
+            if (serverSocket!=null){
+                serverSocket.close();
+            }
+        } catch (IOException e) {
+            Log.d(TAG, "serverSocket.close() : IOException e: "+e.getMessage());
+            e.printStackTrace();
+        }
     }
 
 }
