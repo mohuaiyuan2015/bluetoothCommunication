@@ -77,6 +77,8 @@ public class MainActivity extends AppCompatActivity {
 
     private BluetoothDiscovery bluetoothDiscovery;
 
+    private MyHandler myHandler;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
 
         Intent intent=getIntent();
         Bundle bundle=intent.getExtras();
-        bluetoothDevice= (BluetoothDevice) bundle.get(ConstantString.BLUETUUTH_DEVICE);
+        bluetoothDevice= (BluetoothDevice) bundle.get(Constants.BLUETUUTH_DEVICE);
 
 //        orders =new ArrayList<>();
 //        String[] temp=getResources().getStringArray(R.array.orders);
@@ -132,8 +134,8 @@ public class MainActivity extends AppCompatActivity {
         String []answerTemp=getResources().getStringArray(R.array.answerArray);
         for (int i=0;i<questionTemp.length;i++){
             Map<String,String>map=new HashMap<>();
-            map.put(ConstantString.QUESTION,questionTemp[i]);
-            map.put(ConstantString.ANSWER,answerTemp[i]);
+            map.put(Constants.QUESTION,questionTemp[i]);
+            map.put(Constants.ANSWER,answerTemp[i]);
             dataList.add(map);
         }
 
@@ -149,6 +151,7 @@ public class MainActivity extends AppCompatActivity {
         bluetoothDeviceAdapter=new BluetoothDeviceAdapter(bluetoothDevices);
         deviceRecyclerView.setAdapter(bluetoothDeviceAdapter);
 
+        myHandler=new MyHandler();
 
 
     }
@@ -178,7 +181,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "startConnectThread.setOnClickListener onClick: ");
-                recyclerView.setVisibility(View.VISIBLE);
+                //mohuaiyuan 20171025  暂时注释
+//                recyclerView.setVisibility(View.VISIBLE);
+
 
                startConnectedThread();
             }
@@ -210,35 +215,29 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "send.setOnClickListener onClick: ");
-                try {
-                    String tempStr=sendMesssageEditText.getText().toString().trim();
-                    if (tempStr==null || tempStr.length()<1){
-                        tempStr="蓝牙发送数据了hellowrold";
-                    }
-                    outputStream.write(tempStr.getBytes());
-                } catch (IOException e) {
-                    e.printStackTrace();
+
+                String tempStr = sendMesssageEditText.getText().toString().trim();
+                if (tempStr == null || tempStr.length() < 1) {
+                    tempStr = "蓝牙发送数据了hellowrold";
                 }
+                write(tempStr.getBytes());
             }
         });
+
 
         myAdapter.setOnItemClickListener(new MyAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
                 Log.d(TAG, "myAdapter onItemClick: ");
-                try {
 
-                    Log.d(TAG, "onItemClick position: "+position);
-                    int data=position;
-                    if ((position+1)==dataList.size()){
-                        data=100;
-                    }
-                    Log.d(TAG, "发送的数据: "+data);
-                    outputStream.write(String.valueOf(data).getBytes());
-                } catch (IOException e) {
-                    Log.d(TAG, "发送数据出现 IOException : "+e.getMessage());
-                    e.printStackTrace();
+                Log.d(TAG, "onItemClick position: " + position);
+                int data = position;
+                if ((position + 1) == dataList.size()) {
+                    data = 100;
                 }
+                Log.d(TAG, "发送的数据: " + data);
+                write(String.valueOf(data).getBytes());
+
             }
         });
 
@@ -262,6 +261,42 @@ public class MainActivity extends AppCompatActivity {
         deviceRecyclerView= (RecyclerView) findViewById(R.id.deviceRecyclerView);
     }
 
+    private void write(byte[] array){
+        Log.d(TAG, "write(byte[] array): ");
+        try {
+            outputStream.write(array);
+        } catch (IOException e) {
+            Log.d(TAG, "发送数据 出现 IOException e:"+e.getMessage());
+            e.printStackTrace();
+
+            Message message=new Message();
+            message.what=Constants.VIEW_GONE;
+            myHandler.sendMessage(message);
+            //重新连接
+            reStartConnectThread();
+        }
+
+    }
+    
+    private void reStartConnectThread(){
+        Log.d(TAG, "reStartConnectThread: ");
+        Handler handler=new Handler();
+        Runnable runnable=new Runnable() {
+            @Override
+            public void run() {
+                //关闭原来的连接
+                if (communication.getConnectThread()!=null){
+                    communication.getConnectThread().cancel();
+                    communication.setConnectThread(null);
+                }
+
+                //重新连接
+                startConnectedThread();
+            }
+        };
+        handler.postDelayed(runnable,2000);
+
+    }
 
     private void startConnectedThread(){
         Log.d(TAG, "startConnectedThread: ");
@@ -271,23 +306,52 @@ public class MainActivity extends AppCompatActivity {
             public void connected(BluetoothSocket bluetoothSocket, BluetoothDevice bluetoothDevice) {
                 Log.d(TAG, " ConnectThread.ConnectThreadInterface connected: ");
                 try {
-                    outputStream=bluetoothSocket.getOutputStream();
-                    inputStream=bluetoothSocket.getInputStream();
+                    outputStream = bluetoothSocket.getOutputStream();
+                    inputStream = bluetoothSocket.getInputStream();
 
-//                            while (true){
-//                                if (inputStream!=null) {
-//                                    Log.d(TAG, "inputStream!=null: ");
-//                                    byte[] buffer = new byte[128];
-//                                    // 每次读取128字节，并保存其读取的角标
-//                                    int count = inputStream.read(buffer);
-//                                    String str=new String(buffer, 0, count, "utf-8");
-//                                    Log.d(TAG, "buffer: "+str);
-//                                    if (str.equals("准备接收数据")){
-//                                        Log.d(TAG, "接收到数据。。。: ");
-//                                        break;
-//                                    }
-//                                }
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            try {
+                                while (true) {
+                                    if (inputStream != null) {
+                                        Log.d(TAG, "inputStream!=null: ");
+                                        byte[] buffer = new byte[128];
+                                        // 每次读取128字节，并保存其读取的角标
+                                        int count = inputStream.read(buffer);
+                                        String str = new String(buffer, 0, count, "utf-8");
+                                        Log.d(TAG, "buffer: " + str);
+                                        if (str.equals("准备接收数据")) {
+                                            Log.d(TAG, "接收到数据。。。: ");
+                                            Message message=new Message();
+                                            message.what=Constants.VIEW_VISIBLE;
+                                            myHandler.sendMessage(message);
+                                            break;
+                                        }
+                                    }
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }).start();
+
+                    //mohuaiyuan 20171025
+//                    while (true) {
+//                        if (inputStream != null) {
+//                            Log.d(TAG, "inputStream!=null: ");
+//                            byte[] buffer = new byte[128];
+//                            // 每次读取128字节，并保存其读取的角标
+//                            int count = inputStream.read(buffer);
+//                            String str = new String(buffer, 0, count, "utf-8");
+//                            Log.d(TAG, "buffer: " + str);
+//                            if (str.equals("准备接收数据")) {
+//                                Log.d(TAG, "接收到数据。。。: ");
+//                                break;
 //                            }
+//                        }
+//                    }
 
 
                 } catch (IOException e) {
@@ -297,7 +361,6 @@ public class MainActivity extends AppCompatActivity {
         };
 
         communication.startConnectedThread(bluetoothDevice,connectThreadInterface);
-
 
     }
 
@@ -376,16 +439,55 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-
-
-
-
-
-
     private void refreshBluetoothData(){
         if (bluetoothDeviceAdapter != null) {
             bluetoothDeviceAdapter.notifyDataSetChanged();
+        }
+    }
+
+
+    class MyHandler extends Handler{
+
+        public MyHandler(){
+
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            Log.d(TAG, "MyHandler handleMessage: ");
+            switch (msg.what){
+                case Constants.BLUETOOTH_CONNECT_SUCCESS:
+                    Log.d(TAG, "Constants.BLUETOOTH_CONNECT_SUCCESS: ");
+
+                    break;
+
+                case Constants.BLUETOOTH_CONNECT_FAILED:
+                    Log.d(TAG, "Constants.BLUETOOTH_CONNECT_FAILED: ");
+
+                    break;
+
+                case Constants.BLUETOOTH_CONNECT_LOST:
+                    Log.d(TAG, " Constants.BLUETOOTH_CONNECT_LOST: ");
+
+                    break;
+
+                case Constants.VIEW_VISIBLE:
+                    recyclerView.setVisibility(View.VISIBLE);
+                    break;
+
+                case Constants.VIEW_INVISIBLE:
+
+                    break;
+
+                case Constants.VIEW_GONE:
+                    recyclerView.setVisibility(View.GONE);
+                    break;
+
+                default:
+
+                    break;
+            }
         }
     }
 

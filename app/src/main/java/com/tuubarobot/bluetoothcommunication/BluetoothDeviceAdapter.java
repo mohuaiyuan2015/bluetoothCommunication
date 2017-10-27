@@ -84,8 +84,8 @@ public class BluetoothDeviceAdapter extends RecyclerView.Adapter<BluetoothDevice
         BluetoothDevice bluetoothDevice=list.get(position);
 
         holder.name.setText("蓝牙名称："+bluetoothDevice.getName());
-        holder.address.setText("蓝牙地址"+bluetoothDevice.getAddress());
-        holder.boundState.setText("Bound State"+bluetoothDevice.getBondState());
+        holder.address.setText("蓝牙地址："+bluetoothDevice.getAddress());
+        holder.boundState.setText("绑定状态："+bluetoothDevice.getBondState());
 
     }
 

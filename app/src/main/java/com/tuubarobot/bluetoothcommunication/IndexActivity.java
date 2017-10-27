@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -50,6 +52,7 @@ public class IndexActivity extends AppCompatActivity {
 
     private BluetoothUtils bluetoothUtils;
     private BluetoothDiscovery bluetoothDiscovery;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,6 +97,7 @@ public class IndexActivity extends AppCompatActivity {
         boundDeviceRecyclerView.setLayoutManager(linearLayoutManager);
         bluetoothDeviceAdapter=new BluetoothDeviceAdapter(bluetoothDevices);
         boundDeviceRecyclerView.setAdapter(bluetoothDeviceAdapter);
+
     }
 
     private void initListener() {
@@ -119,6 +123,8 @@ public class IndexActivity extends AppCompatActivity {
             }
         });
 
+
+
         bluetoothDeviceAdapter.setOnItemClickListener(new BluetoothDeviceAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
@@ -140,24 +146,50 @@ public class IndexActivity extends AppCompatActivity {
 
                 //方式三
                 //mohuaiyuan 绑定（配对）蓝牙
-                try {
-                    bluetoothDevice=bluetoothDevices.get(position);
-                    bluetoothDiscovery.setDevice(bluetoothDevice);
-                    //通过工具类ClsUtils,调用createBond方法
-                    ClsUtils.createBond(bluetoothDevice.getClass(),bluetoothDevice);
+//                try {
+//                    bluetoothDevice=bluetoothDevices.get(position);
+//                    bluetoothDiscovery.setDevice(bluetoothDevice);
+//                    //通过工具类ClsUtils,调用createBond方法
+//                    ClsUtils.createBond(bluetoothDevice.getClass(),bluetoothDevice);
+//
+////                    //1.确认配对
+////                    ClsUtils.setPairingConfirmation(bluetoothDevice.getClass(), bluetoothDevice, true);
+////                    //2.终止有序广播
+////                    bluetoothDiscovery.abortBroadcast();//如果没有将广播终止，则会出现一个一闪而过的配对框。
+////                    //3.调用setPin方法进行配对...
+////                    boolean ret = ClsUtils.setPin(bluetoothDevice.getClass(), bluetoothDevice, pin);
+//                } catch (Exception e) {
+//                    Log.e(TAG, "配对蓝牙 出现错误 : " );
+//                    Log.e(TAG, "Exception e: "+e.getMessage() );
+//                    e.printStackTrace();
+//                }
 
-//                    //1.确认配对
-//                    ClsUtils.setPairingConfirmation(bluetoothDevice.getClass(), bluetoothDevice, true);
-//                    //2.终止有序广播
-//                    bluetoothDiscovery.abortBroadcast();//如果没有将广播终止，则会出现一个一闪而过的配对框。
-//                    //3.调用setPin方法进行配对...
-//                    boolean ret = ClsUtils.setPin(bluetoothDevice.getClass(), bluetoothDevice, pin);
-                } catch (Exception e) {
-                    Log.e(TAG, "配对蓝牙 出现错误 : " );
-                    Log.e(TAG, "Exception e: "+e.getMessage() );
-                    e.printStackTrace();
+                //mohuaiyuan  暂时 这样子写  20171025
+                bluetoothDevice=bluetoothDevices.get(position);
+                if (bluetoothDevice.getBondState()==BluetoothDevice.BOND_BONDED) {
+
+                    bluetoothDevice = bluetoothDevices.get(position);
+                    Intent intent = new Intent(context, MainActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putParcelable(Constants.BLUETUUTH_DEVICE, bluetoothDevice);
+                    intent.putExtras(bundle);
+                    context.startActivity(intent);
+
+                }else {
+
+                    try {
+                        bluetoothDevice=bluetoothDevices.get(position);
+                        bluetoothDiscovery.setDevice(bluetoothDevice);
+                        //通过工具类ClsUtils,调用createBond方法
+                        ClsUtils.createBond(bluetoothDevice.getClass(),bluetoothDevice);
+
+                    } catch (Exception e) {
+                        Log.e(TAG, "配对蓝牙 出现错误 : " );
+                        Log.e(TAG, "Exception e: "+e.getMessage() );
+                        e.printStackTrace();
+                    }
+
                 }
-
 
             }
         });
@@ -294,6 +326,9 @@ public class IndexActivity extends AppCompatActivity {
         bluetoothDiscovery.startDiscovery();
     }
 
+
+}
+
  /* * ━━━━━━感觉萌萌哒━━━━━━
  * 　　　　　　　　┏┓　　　┏┓
  * 　　　　　　　┏┛┻━━━┛┻┓
@@ -318,7 +353,3 @@ public class IndexActivity extends AppCompatActivity {
  * 　　　　　　　　　　┗┻┛　┗┻┛
  *
  */
-
-
-
-}

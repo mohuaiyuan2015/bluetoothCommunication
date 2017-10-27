@@ -85,8 +85,8 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         cellViewHolder.itemView.setTag(position);
 
         Map<String,String>map=list.get(position);
-        holder.question.setText(map.get(ConstantString.QUESTION));
-        holder.answer.setText(map.get(ConstantString.ANSWER));
+        holder.question.setText(map.get(Constants.QUESTION));
+        holder.answer.setText(map.get(Constants.ANSWER));
 
 
     }

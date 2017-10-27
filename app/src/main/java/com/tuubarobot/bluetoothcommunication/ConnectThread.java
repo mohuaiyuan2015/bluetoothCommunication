@@ -1,7 +1,10 @@
 package com.tuubarobot.bluetoothcommunication;
 
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 import java.io.IOException;
@@ -21,8 +24,12 @@ public class ConnectThread extends Thread {
     private final BluetoothDevice mDevice;
 
     private ConnectThreadInterface connectThreadInterface;
+    private ConnectStatusInterface connectStatusInterface;
+
+    private BluetoothAdapter bluetoothAdapter;
 
     public ConnectThread(BluetoothDevice device) {
+        bluetoothAdapter=BluetoothAdapter.getDefaultAdapter();
         mDevice = device;
         BluetoothSocket tmp = null;
         // 得到一个bluetoothsocket
@@ -40,7 +47,11 @@ public class ConnectThread extends Thread {
 
     @Override
     public void run() {
-        Log.i(TAG, "BEGIN mConnectThread");
+        Log.d(TAG, "ConnectThread  run: ");
+
+        // Always cancel discovery because it will slow down a connection
+        bluetoothAdapter.cancelDiscovery();
+        
         try {
             // socket 连接,该调用会阻塞，直到连接成功或失败
             mmSocket.connect();
@@ -50,18 +61,31 @@ public class ConnectThread extends Thread {
             } catch (IOException e2) {
                 e2.printStackTrace();
             }
+
+            if(connectStatusInterface!=null){
+                connectStatusInterface.connectionFailed();
+            }
+
             return;
         }
-        // 启动连接线程
-        if (connectThreadInterface!=null){
-            connectThreadInterface.connected(mmSocket, mDevice);
+        try {
+            // 启动连接线程
+            if (connectThreadInterface!=null){
+                connectThreadInterface.connected(mmSocket, mDevice);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
     }
 
+
+
     public void cancel() {
         try {
-            mmSocket.close();
+            if (mmSocket!=null){
+                mmSocket.close();
+            }
         } catch (IOException e) {
             Log.e(TAG, "close() of connect socket failed", e);
         }
@@ -75,6 +99,14 @@ public class ConnectThread extends Thread {
         this.connectThreadInterface = connectThreadInterface;
     }
 
+    public ConnectStatusInterface getConnectStatusInterface() {
+        return connectStatusInterface;
+    }
+
+    public void setConnectStatusInterface(ConnectStatusInterface connectStatusInterface) {
+        this.connectStatusInterface = connectStatusInterface;
+    }
+
     public String getTAG() {
         return TAG;
     }
@@ -83,8 +115,13 @@ public class ConnectThread extends Thread {
         this.TAG = TAG;
     }
 
+
     interface ConnectThreadInterface{
         public void connected(BluetoothSocket bluetoothSocket, BluetoothDevice bluetoothDevice);
+    }
+
+    interface ConnectStatusInterface{
+        public void connectionFailed();
     }
 
 }

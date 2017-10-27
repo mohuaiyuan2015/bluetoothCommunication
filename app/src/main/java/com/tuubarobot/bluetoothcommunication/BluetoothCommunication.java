@@ -2,6 +2,7 @@ package com.tuubarobot.bluetoothcommunication;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.os.Handler;
 import android.util.Log;
 
 import java.io.IOException;
@@ -45,6 +46,8 @@ public class BluetoothCommunication {
         connectThread.start();
     }
 
+
+
     /**
      * 服务器端 线程
      */
@@ -70,4 +73,20 @@ public class BluetoothCommunication {
         acceptThread.start();
     }
 
+
+    public ConnectThread getConnectThread() {
+        return connectThread;
+    }
+
+    public void setConnectThread(ConnectThread connectThread) {
+        this.connectThread = connectThread;
+    }
+
+    public AcceptThread getAcceptThread() {
+        return acceptThread;
+    }
+
+    public void setAcceptThread(AcceptThread acceptThread) {
+        this.acceptThread = acceptThread;
+    }
 }
