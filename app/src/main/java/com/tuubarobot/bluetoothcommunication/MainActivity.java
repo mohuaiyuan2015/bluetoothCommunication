@@ -120,7 +120,9 @@ public class MainActivity extends AppCompatActivity {
 
         Intent intent=getIntent();
         Bundle bundle=intent.getExtras();
-        bluetoothDevice= (BluetoothDevice) bundle.get(Constants.BLUETUUTH_DEVICE);
+        if (bundle!=null){
+            bluetoothDevice= (BluetoothDevice) bundle.get(Constants.BLUETUUTH_DEVICE);
+        }
 
 //        orders =new ArrayList<>();
 //        String[] temp=getResources().getStringArray(R.array.orders);
