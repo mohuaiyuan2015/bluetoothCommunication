@@ -77,7 +77,7 @@ public class AcceptThread extends Thread {
                                 outputStream.write("准备接收数据".getBytes());
 
                                 // 创建一个128字节的缓冲
-                                byte[] buffer = new byte[128];
+                                byte[] buffer = new byte[1024];
                                 // 每次读取128字节，并保存其读取的角标
                                 if (inputStream!=null){
                                     int count = inputStream.read(buffer);
