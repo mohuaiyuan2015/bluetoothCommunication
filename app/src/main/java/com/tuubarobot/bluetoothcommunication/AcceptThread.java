@@ -27,8 +27,6 @@ public class AcceptThread extends Thread {
 
     private BluetoothServerSocket serverSocket;// 服务端接口
     private BluetoothSocket socket;// 获取到客户端的接口
-    private InputStream inputStream;// 获取到输入流
-    private OutputStream outputStream;// 获取到输出流
 
 
     private boolean isLoop=false;
@@ -55,56 +53,10 @@ public class AcceptThread extends Thread {
                 socket = serverSocket.accept();
                 Log.d(TAG, "socket==null: "+(socket==null));
 
-                Thread handleSocket=new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            // 获取到输入流
-                            inputStream = socket.getInputStream();
-                            // 获取到输出流
-                            outputStream = socket.getOutputStream();
+                ServerThread serverThread=new ServerThread(socket);
 
-                            Log.d(TAG, "准备接收数据: ");
-                            Log.d(TAG, "获取到输入流 inputStream: "+inputStream);
-                            Log.d(TAG, "获取到输出流 outputStream: "+outputStream);
-
-                            boolean isConnected=socket.isConnected();
-                            Log.d(TAG, "isConnected: "+isConnected);
-
-                            while (socket.isConnected()){
-                                Log.d(TAG, "读数据。。。");
-
-                                outputStream.write("准备接收数据".getBytes());
-
-                                // 创建一个128字节的缓冲
-                                byte[] buffer = new byte[1024];
-                                // 每次读取128字节，并保存其读取的角标
-                                if (inputStream!=null){
-                                    int count = inputStream.read(buffer);
-                                    // 创建Message类，向handler发送数据
-                                    Message msg = new Message();
-                                    // 发送一个String的数据，让他向上转型为obj类型
-                                    msg.obj = new String(buffer, 0, count, "utf-8");
-                                    // 发送数据
-                                    handler.sendMessage(msg);
-                                }else {
-                                    Log.e(TAG, "inputStream==null ..." );
-                                }
-                            }
-
-                            inputStream.close();
-                            socket.close();
-                        } catch (IOException e) {
-                            Log.d(TAG, "读数据线程中出现 IOException ");
-
-                            Log.e(TAG, "IOException e: "+e.getMessage());
-                            e.printStackTrace();
-                        }
-                    }
-                });
-
-                handleSocket.setDaemon(true);
-                handleSocket.start();
+                serverThread.setDaemon(true);
+                serverThread.start();
             }
         } catch (IOException e) {
             isLoop=false;
@@ -186,6 +138,71 @@ public class AcceptThread extends Thread {
         } catch (IOException e) {
             Log.d(TAG, "serverSocket.close() : IOException e: "+e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    class ServerThread extends Thread{
+
+        private BluetoothSocket bluetoothSocket;
+        private InputStream inputStream;// 获取到输入流
+        private OutputStream outputStream;// 获取到输出流
+
+        public ServerThread(BluetoothSocket bluetoothSocket){
+            Log.d(TAG, "ServerThread: ");
+            this.bluetoothSocket=bluetoothSocket;
+            try {
+                // 获取到输入流
+                inputStream = bluetoothSocket.getInputStream();
+                // 获取到输出流
+                outputStream = bluetoothSocket.getOutputStream();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            Log.d(TAG, "准备接收数据: ");
+            Log.d(TAG, "获取到输入流 inputStream: "+inputStream);
+            Log.d(TAG, "获取到输出流 outputStream: "+outputStream);
+
+        }
+
+        @Override
+        public void run() {
+            super.run();
+            try {
+                boolean isConnected=bluetoothSocket.isConnected();
+                Log.d(TAG, "isConnected: "+isConnected);
+
+                while (bluetoothSocket.isConnected()){
+                    Log.d(TAG, "读数据。。。");
+
+                    outputStream.write("准备接收数据".getBytes());
+
+                    // 创建一个128字节的缓冲
+                    byte[] buffer = new byte[1024];
+                    // 每次读取128字节，并保存其读取的角标
+                    if (inputStream!=null){
+                        int count = inputStream.read(buffer);
+                        // 创建Message类，向handler发送数据
+                        Message msg = new Message();
+                        // 发送一个String的数据，让他向上转型为obj类型
+                        msg.obj = new String(buffer, 0, count, "utf-8");
+                        // 发送数据
+                        handler.sendMessage(msg);
+                    }else {
+                        Log.e(TAG, "inputStream==null ..." );
+                    }
+                }
+
+                inputStream.close();
+                bluetoothSocket.close();
+            } catch (IOException e) {
+                Log.d(TAG, "读数据线程中出现 IOException ");
+
+                Log.e(TAG, "IOException e: "+e.getMessage());
+                e.printStackTrace();
+            }
+
+
         }
     }
 

@@ -12,7 +12,7 @@ import android.util.Log;
  */
 
 public class BluetoothConnectActivityReceiver extends BroadcastReceiver {
-    private static final String TAG = "BluetoothConnectActivit";
+    private static final String TAG = "MainActivity";
 
 
     private String pin = "1234";  //此处为你要连接的蓝牙设备的初始密钥，一般为1234或0000
@@ -23,16 +23,39 @@ public class BluetoothConnectActivityReceiver extends BroadcastReceiver {
         if (intent.getAction().equals("android.bluetooth.device.action.PAIRING_REQUEST")) {
             Log.d(TAG, "手机配对 广播: ");
             BluetoothDevice mBluetoothDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+
+
             try {
-                //(三星)4.3版本测试手机还是会弹出用户交互页面(闪一下)，如果不注释掉下面这句页面不会取消但可以配对成功。(中兴，魅族4(Flyme 6))5.1版本手机两中情况下都正常
+                //1.确认配对
+                Log.d(TAG, "确认配对..... ");
                 ClsUtils.setPairingConfirmation(mBluetoothDevice.getClass(), mBluetoothDevice, true);
-                abortBroadcast();//如果没有将广播终止，则会出现一个一闪而过的配对框。
-                //3.调用setPin方法进行配对...
-                boolean ret = ClsUtils.setPin(mBluetoothDevice.getClass(), mBluetoothDevice, pin);
-//                ClsUtils.cancelPairingUserInput(mBluetoothDevice.getClass(), mBluetoothDevice);
             } catch (Exception e) {
+                Log.e(TAG, "确认配对:Exception e : "+e.getMessage());
                 e.printStackTrace();
             }
+            //2.终止有序广播
+            Log.i("order...", "isOrderedBroadcast:"+isOrderedBroadcast()+",isInitialStickyBroadcast:"+isInitialStickyBroadcast());
+            abortBroadcast();//如果没有将广播终止，则会出现一个一闪而过的配对框。
+            try {
+                //3.调用setPin方法进行配对...
+                Log.d(TAG, "调用setPin方法进行配对..... ");
+                boolean ret = ClsUtils.setPin(mBluetoothDevice.getClass(), mBluetoothDevice, pin);
+            } catch (Exception e) {
+                Log.e(TAG, "调用setPin方法进行配对:Exception e : "+e.getMessage());
+                e.printStackTrace();
+            }
+
+
+            try {
+                //取消用户输入
+                Log.d(TAG, "取消用户输入.....  ");
+//                ClsUtils.cancelPairingUserInput(mBluetoothDevice.getClass(), mBluetoothDevice);
+            } catch (Exception e) {
+                Log.e(TAG, "取消用户输入:Exception e : "+e.getMessage());
+                e.printStackTrace();
+            }
+
+
         }
 
     }
