@@ -10,6 +10,7 @@ public class Constants {
     public static final String ANSWER="answer";
 
     public static final String BLUETUUTH_DEVICE="bluetooth_device";
+    public static final String BLUETUUTH_DEVICE_LIST="bluetooth_device_list";
 
     public static final int BLUETOOTH_CONNECT_SUCCESS=100;
     public static final int BLUETOOTH_CONNECT_FAILED=200;

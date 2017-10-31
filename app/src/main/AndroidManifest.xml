@@ -26,7 +26,8 @@
         </activity>
         <activity
             android:name=".IndexActivity"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -34,7 +35,8 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".BluetoothConnectActivityReceiver" >
+        <receiver android:name=".BluetoothConnectActivityReceiver"
+            android:screenOrientation="portrait">
             <intent-filter android:priority="1000">
                 <action android:name="android.bluetooth.device.action.PAIRING_REQUEST" />
             </intent-filter>

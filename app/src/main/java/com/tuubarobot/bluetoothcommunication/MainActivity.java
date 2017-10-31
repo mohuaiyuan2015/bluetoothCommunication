@@ -63,8 +63,8 @@ public class MainActivity extends AppCompatActivity {
     private List<Map<String,String>> dataList;
     private MyAdapter myAdapter;
 
-    private List<BluetoothDevice> bluetoothDevices;
-    private BluetoothDeviceAdapter bluetoothDeviceAdapter;
+//    private List<BluetoothDevice> bluetoothDevices;
+//    private BluetoothDeviceAdapter bluetoothDeviceAdapter;
 
     private BluetoothUtils bluetoothUtils;
     private BluetoothCommunication communication;
@@ -147,11 +147,11 @@ public class MainActivity extends AppCompatActivity {
         myAdapter = new MyAdapter(dataList);
         recyclerView.setAdapter(myAdapter);
 
-        bluetoothDevices=new ArrayList<>();
-        LinearLayoutManager linearLayoutManager=new LinearLayoutManager(context);
-        deviceRecyclerView.setLayoutManager(linearLayoutManager);
-        bluetoothDeviceAdapter=new BluetoothDeviceAdapter(bluetoothDevices);
-        deviceRecyclerView.setAdapter(bluetoothDeviceAdapter);
+//        bluetoothDevices=new ArrayList<>();
+//        LinearLayoutManager linearLayoutManager=new LinearLayoutManager(context);
+//        deviceRecyclerView.setLayoutManager(linearLayoutManager);
+//        bluetoothDeviceAdapter=new BluetoothDeviceAdapter(bluetoothDevices);
+//        deviceRecyclerView.setAdapter(bluetoothDeviceAdapter);
 
         myHandler=new MyHandler();
 
@@ -185,33 +185,44 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "startConnectThread.setOnClickListener onClick: ");
                 //mohuaiyuan 20171025  暂时注释
 //                recyclerView.setVisibility(View.VISIBLE);
+                Log.d(TAG, "connnectInfo size: "+ConnectionInfoCollector.getBluetoothDeviceModelList().size());
+                if (ConnectionInfoCollector.getBluetoothDeviceModelList().isEmpty()){
 
-
-               startConnectedThread();
-            }
-        });
-
-        bluetoothDiscovery.setDiscoveryListener(new BluetoothDiscovery.BluetoothDiscoveryListener() {
-            @Override
-            public void discovery(BluetoothDevice bluetoothDevice) {
-                bluetoothDevices.add(bluetoothDevice);
-                refreshBluetoothData();
-
-            }
-        });
-
-        startDiscovery.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG, "startDiscovery.setOnClickListener onClick: ");
-                if (!bluetoothDevices.isEmpty()){
-                    bluetoothDevices.clear();
-                    refreshBluetoothData();
+                    startConnectedThread();
+                }else {
+                    //TODO mohuaiyuan 20171030 连接多个 蓝牙
+                    int size=ConnectionInfoCollector.getBluetoothDeviceModelList().size();
+                    for (int i=0;i<size;i++){
+                        BluetoothDevice device=ConnectionInfoCollector.getBluetoothDeviceModelList().get(i).getDevice();
+                        startConnectedThread(device);
+                    }
                 }
-                bluetoothDiscovery.startDiscovery();
+
 
             }
         });
+
+//        bluetoothDiscovery.setDiscoveryListener(new BluetoothDiscovery.BluetoothDiscoveryListener() {
+//            @Override
+//            public void discovery(BluetoothDevice bluetoothDevice) {
+//                bluetoothDevices.add(bluetoothDevice);
+//                refreshBluetoothData();
+//
+//            }
+//        });
+//
+//        startDiscovery.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Log.d(TAG, "startDiscovery.setOnClickListener onClick: ");
+//                if (!bluetoothDevices.isEmpty()){
+//                    bluetoothDevices.clear();
+//                    refreshBluetoothData();
+//                }
+//                bluetoothDiscovery.startDiscovery();
+//
+//            }
+//        });
 
         send.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -243,13 +254,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        bluetoothDeviceAdapter.setOnItemClickListener(new BluetoothDeviceAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(View itemView, int position) {
-                Log.d(TAG, "bluetoothDeviceAdapter.setOnItemClickListener onItemClick: ");
-                startConnectedThread(bluetoothDevices.get(position));
-            }
-        });
+//        bluetoothDeviceAdapter.setOnItemClickListener(new BluetoothDeviceAdapter.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(View itemView, int position) {
+//                Log.d(TAG, "bluetoothDeviceAdapter.setOnItemClickListener onItemClick: ");
+//                startConnectedThread(bluetoothDevices.get(position));
+//            }
+//        });
 
     }
 
@@ -441,11 +452,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void refreshBluetoothData(){
-        if (bluetoothDeviceAdapter != null) {
-            bluetoothDeviceAdapter.notifyDataSetChanged();
-        }
-    }
+//    private void refreshBluetoothData(){
+//        if (bluetoothDeviceAdapter != null) {
+//            bluetoothDeviceAdapter.notifyDataSetChanged();
+//        }
+//    }
 
 
     class MyHandler extends Handler{

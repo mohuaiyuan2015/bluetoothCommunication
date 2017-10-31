@@ -26,6 +26,12 @@
         android:paddingBottom="10dip"
         android:textSize="20sp"
         />
+    <CheckBox
+        android:id="@+id/selectedState"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="选中状态"/>
+
     <View
         android:layout_width="match_parent"
         android:layout_height="2dip"

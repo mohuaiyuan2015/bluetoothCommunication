@@ -18,8 +18,6 @@ public class ConnectThread extends Thread {
     private  String TAG = "ConnectThread";
 
 
-    public static  final UUID SERVICE_UUID= UUID.fromString(BluetoothCommunication.My_UUID) ;
-
     private BluetoothSocket mmSocket;
     private final BluetoothDevice mDevice;
 
@@ -27,15 +25,17 @@ public class ConnectThread extends Thread {
     private ConnectStatusInterface connectStatusInterface;
 
     private BluetoothAdapter bluetoothAdapter;
+    private BluetoothUtils bluetoothUtils;
 
     public ConnectThread(BluetoothDevice device) {
         bluetoothAdapter=BluetoothAdapter.getDefaultAdapter();
+        bluetoothUtils=new BluetoothUtils();
         mDevice = device;
         BluetoothSocket tmp = null;
         // 得到一个bluetoothsocket
         try {
             if (mmSocket==null || !mmSocket.isConnected()){
-                mmSocket = mDevice.createRfcommSocketToServiceRecord(SERVICE_UUID);
+                mmSocket = mDevice.createRfcommSocketToServiceRecord(bluetoothUtils.createClientUUID(mDevice));
             }else {
                 Log.d(TAG, "ConnectThread is connected: ");
             }

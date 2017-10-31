@@ -22,6 +22,22 @@
         android:text="get Bound Devices"
         />
 
+    <Button
+        android:id="@+id/getConnectInfoBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAllCaps="false"
+        android:text="get Debug Info"/>
+
+    <Button
+        android:id="@+id/connectBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAllCaps="false"
+        android:text="connect"
+        />
+
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/boundDeviceRecyclerView"
         android:layout_width="match_parent"
