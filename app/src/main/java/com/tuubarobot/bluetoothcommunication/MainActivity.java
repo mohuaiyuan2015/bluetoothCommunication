@@ -54,6 +54,8 @@ public class MainActivity extends AppCompatActivity {
     private Button startServiceThread;
     private Button startClientThread;
     private Button startDiscovery;
+    private Button getDebugMsgBtn;
+
     private RecyclerView recyclerView;
     private RecyclerView deviceRecyclerView;
 
@@ -72,6 +74,9 @@ public class MainActivity extends AppCompatActivity {
 
     private OutputStream outputStream;
     private InputStream inputStream;
+
+    private List<OutputStream> outputStreamList;
+    private List<InputStream> inputStreamList;
 
     private List<String> list=new LinkedList<>();
 
@@ -117,11 +122,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initData() {
+        Log.d(TAG, "initData: ");
 
         Intent intent=getIntent();
         Bundle bundle=intent.getExtras();
         if (bundle!=null){
             bluetoothDevice= (BluetoothDevice) bundle.get(Constants.BLUETUUTH_DEVICE);
+            Log.d(TAG, "bluetoothDevice:name- "+bluetoothDevice.getName()+"  address:"+bluetoothDevice.getAddress());
         }
 
 //        orders =new ArrayList<>();
@@ -155,6 +162,9 @@ public class MainActivity extends AppCompatActivity {
 
         myHandler=new MyHandler();
 
+        outputStreamList=new ArrayList<>();
+        inputStreamList=new ArrayList<>();
+
 
     }
 
@@ -187,10 +197,12 @@ public class MainActivity extends AppCompatActivity {
 //                recyclerView.setVisibility(View.VISIBLE);
                 Log.d(TAG, "connnectInfo size: "+ConnectionInfoCollector.getBluetoothDeviceModelList().size());
                 if (ConnectionInfoCollector.getBluetoothDeviceModelList().isEmpty()){
+                    Log.d(TAG, "开始  连接 单个 蓝牙: ");
 
                     startConnectedThread();
                 }else {
                     //TODO mohuaiyuan 20171030 连接多个 蓝牙
+                    Log.d(TAG, "开始  连接 多个 蓝牙: ");
                     int size=ConnectionInfoCollector.getBluetoothDeviceModelList().size();
                     for (int i=0;i<size;i++){
                         BluetoothDevice device=ConnectionInfoCollector.getBluetoothDeviceModelList().get(i).getDevice();
@@ -237,6 +249,24 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        getDebugMsgBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "getDebugMsgBtn.setOnClickListener onClick: ");
+                int size=ConnectionInfoCollector.getBluetoothDeviceModelList().size();
+                List<BluetoothDeviceModel>list=ConnectionInfoCollector.getBluetoothDeviceModelList();
+                Log.d(TAG, "----------------connect info ----------------: ");
+                for (int i=0;i<size;i++){
+                    String name=list.get(i).getDevice().getName();
+                    String mac=list.get(i).getDevice().getAddress();
+                    boolean selectState=list.get(i).isSelectState();
+                    Log.d(TAG, "name- "+name+"  mac-"+mac+"  selectState-"+selectState);
+
+                }
+                Log.d(TAG, "---------------------------------------------------: ");
+
+            }
+        });
 
         myAdapter.setOnItemClickListener(new MyAdapter.OnItemClickListener() {
             @Override
@@ -249,7 +279,15 @@ public class MainActivity extends AppCompatActivity {
                     data = 100;
                 }
                 Log.d(TAG, "发送的数据: " + data);
-                write(String.valueOf(data).getBytes());
+                if (ConnectionInfoCollector.getBluetoothDeviceModelList().isEmpty()) {
+                    //mohuaiyuan 发送给单个蓝牙
+                    Log.d(TAG, "给 单个蓝牙发送数据: ");
+                    write(String.valueOf(data).getBytes());
+                }else {
+                    //mohuaiyuan 发送给多个蓝牙
+                    Log.d(TAG, "给 多个蓝牙发送数据：");
+                    write(outputStreamList,String.valueOf(data).getBytes());
+                }
 
             }
         });
@@ -270,6 +308,7 @@ public class MainActivity extends AppCompatActivity {
         sendMesssageEditText= (EditText) findViewById(R.id.sendMesssageEditText);
         send= (Button) findViewById(R.id.send);
         startDiscovery= (Button) findViewById(R.id.startDiscovery);
+        getDebugMsgBtn= (Button) findViewById(R.id.getDebugMsgBtn);
         recyclerView= (RecyclerView) findViewById(R.id.orderRecyclerView);
         deviceRecyclerView= (RecyclerView) findViewById(R.id.deviceRecyclerView);
     }
@@ -289,6 +328,29 @@ public class MainActivity extends AppCompatActivity {
             reStartConnectThread();
         }
 
+    }
+
+    private void write(OutputStream outputStream,byte[] array){
+        Log.d(TAG, "write(OutputStream outputStream,byte[] array): ");
+        try {
+            outputStream.write(array);
+        } catch (IOException e) {
+            Log.d(TAG, "发送数据 出现 IOException e:"+e.getMessage());
+            e.printStackTrace();
+
+            Message message=new Message();
+            message.what=Constants.VIEW_GONE;
+            myHandler.sendMessage(message);
+            //重新连接
+            reStartConnectThread();
+        }
+    }
+
+    private void write(List<OutputStream>streams ,byte[]array){
+        Log.d(TAG, "write(List<OutputStream>streams ,byte[]array): ");
+        for (int i=0;i<streams.size();i++){
+            write(streams.get(i),array);
+        }
     }
     
     private void reStartConnectThread(){
@@ -321,6 +383,9 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     outputStream = bluetoothSocket.getOutputStream();
                     inputStream = bluetoothSocket.getInputStream();
+
+                    outputStreamList.add(outputStream);
+                    inputStreamList.add(inputStream);
 
                     new Thread(new Runnable() {
                         @Override

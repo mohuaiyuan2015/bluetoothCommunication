@@ -35,7 +35,9 @@ public class ConnectThread extends Thread {
         // 得到一个bluetoothsocket
         try {
             if (mmSocket==null || !mmSocket.isConnected()){
-                mmSocket = mDevice.createRfcommSocketToServiceRecord(bluetoothUtils.createClientUUID(mDevice));
+                UUID uuid=bluetoothUtils.createClientUUID(mDevice);
+                Log.d(TAG, "uuid: "+uuid.toString());
+                mmSocket = mDevice.createRfcommSocketToServiceRecord(uuid);
             }else {
                 Log.d(TAG, "ConnectThread is connected: ");
             }
