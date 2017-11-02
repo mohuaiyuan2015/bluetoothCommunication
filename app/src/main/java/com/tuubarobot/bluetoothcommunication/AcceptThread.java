@@ -10,6 +10,9 @@ import android.util.Log;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -30,12 +33,14 @@ public class AcceptThread extends Thread {
 
     private boolean isLoop=false;
     private BluetoothUtils bluetoothUtils;
+    private List<BluetoothSocket> bluetoothSocketList;
 
     public AcceptThread() {
         Log.d(TAG, "AcceptThread: ");
         if (mBluetoothAdapter==null){
             mBluetoothAdapter= BluetoothAdapter.getDefaultAdapter();
             bluetoothUtils=new BluetoothUtils();
+            bluetoothSocketList=new ArrayList<>();
         }
     }
 
@@ -55,6 +60,8 @@ public class AcceptThread extends Thread {
                 // 接收其客户端的接口
                 socket = serverSocket.accept();
                 Log.d(TAG, "socket==null: "+(socket==null));
+
+                bluetoothSocketList.add(socket);
 
                 ServerThread serverThread=new ServerThread(socket);
 
@@ -144,6 +151,22 @@ public class AcceptThread extends Thread {
         }
     }
 
+    public void closeAll(){
+        Log.d(TAG, "closeAll: ");
+        for (int i=0;i<bluetoothSocketList.size();i++){
+            try {
+                if (bluetoothSocketList.get(i)!=null){
+                    bluetoothSocketList.get(i).close();
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "closeAll 出现 IOException e: " +e.getMessage());
+                e.printStackTrace();
+            }
+
+        }
+
+    }
+
     class ServerThread extends Thread{
 
         private BluetoothSocket bluetoothSocket;
@@ -199,9 +222,10 @@ public class AcceptThread extends Thread {
                 inputStream.close();
                 bluetoothSocket.close();
             } catch (IOException e) {
-                Log.d(TAG, "读数据线程中出现 IOException ");
+                Log.e(TAG, "读数据线程中出现 IOException ");
 
                 Log.e(TAG, "IOException e: "+e.getMessage());
+                closeAll();
                 e.printStackTrace();
             }
 

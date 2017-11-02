@@ -84,6 +84,8 @@ public class MainActivity extends AppCompatActivity {
 
     private MyHandler myHandler;
 
+    private int connectionCount;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -196,20 +198,7 @@ public class MainActivity extends AppCompatActivity {
                 //mohuaiyuan 20171025  暂时注释
 //                recyclerView.setVisibility(View.VISIBLE);
                 Log.d(TAG, "connnectInfo size: "+ConnectionInfoCollector.getBluetoothDeviceModelList().size());
-                if (ConnectionInfoCollector.getBluetoothDeviceModelList().isEmpty()){
-                    Log.d(TAG, "开始  连接 单个 蓝牙: ");
-
-                    startConnectedThread();
-                }else {
-                    //TODO mohuaiyuan 20171030 连接多个 蓝牙
-                    Log.d(TAG, "开始  连接 多个 蓝牙: ");
-                    int size=ConnectionInfoCollector.getBluetoothDeviceModelList().size();
-                    for (int i=0;i<size;i++){
-                        BluetoothDevice device=ConnectionInfoCollector.getBluetoothDeviceModelList().get(i).getDevice();
-                        startConnectedThread(device);
-                    }
-                }
-
+               connectToServer();
 
             }
         });
@@ -256,6 +245,7 @@ public class MainActivity extends AppCompatActivity {
                 int size=ConnectionInfoCollector.getBluetoothDeviceModelList().size();
                 List<BluetoothDeviceModel>list=ConnectionInfoCollector.getBluetoothDeviceModelList();
                 Log.d(TAG, "----------------connect info ----------------: ");
+                Log.d(TAG, "size: "+size);
                 for (int i=0;i<size;i++){
                     String name=list.get(i).getDevice().getName();
                     String mac=list.get(i).getDevice().getAddress();
@@ -263,7 +253,15 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "name- "+name+"  mac-"+mac+"  selectState-"+selectState);
 
                 }
-                Log.d(TAG, "---------------------------------------------------: ");
+                Log.d(TAG, "-------------inputStreamList------------------------: ");
+                int isSize=inputStreamList.size();
+                Log.d(TAG, "inputStreamList.size(): "+isSize);
+
+                Log.d(TAG, "-------------inputStreamList------------------------: ");
+                int osSize=outputStreamList.size();
+                Log.d(TAG, "outputStreamList.size(): "+isSize);
+                Log.d(TAG, "------------------------------------------------------: ");
+
 
             }
         });
@@ -359,63 +357,122 @@ public class MainActivity extends AppCompatActivity {
         Runnable runnable=new Runnable() {
             @Override
             public void run() {
+                //mohuaiyuan 单个蓝牙 方式一
                 //关闭原来的连接
-                if (communication.getConnectThread()!=null){
-                    communication.getConnectThread().cancel();
-                    communication.setConnectThread(null);
-                }
+                closeConnection();
 
+                //mohuaiyuan 20171111 连接单个蓝牙 方式一
                 //重新连接
-                startConnectedThread();
+//                startConnectedThread();
+
+                //mohuaiyuan 20171111 连接多个蓝牙 方式二
+                //重新连接
+                connectToServer();
+
+
             }
         };
         handler.postDelayed(runnable,2000);
 
     }
 
-    private void startConnectedThread(){
-        Log.d(TAG, "startConnectedThread: ");
+    private void closeConnection(){
+        Log.d(TAG, "closeConnection: ");
+        if (ConnectionInfoCollector.getBluetoothDeviceModelList().isEmpty()){
+                //mohuaiyuan 单个蓝牙  关闭连接
+                communication.cancleConnectThread();
 
-        ConnectThread.ConnectThreadInterface connectThreadInterface=new ConnectThread.ConnectThreadInterface() {
-            @Override
-            public void connected(BluetoothSocket bluetoothSocket, BluetoothDevice bluetoothDevice) {
-                Log.d(TAG, " ConnectThread.ConnectThreadInterface connected: ");
-                try {
-                    outputStream = bluetoothSocket.getOutputStream();
-                    inputStream = bluetoothSocket.getInputStream();
+        }else {
 
-                    outputStreamList.add(outputStream);
-                    inputStreamList.add(inputStream);
+            communication.cancleAllConnectThread();
+        }
 
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
+    }
 
-                            try {
-                                while (true) {
-                                    if (inputStream != null) {
-                                        Log.d(TAG, "inputStream!=null: ");
-                                        byte[] buffer = new byte[128];
-                                        // 每次读取128字节，并保存其读取的角标
-                                        int count = inputStream.read(buffer);
-                                        String str = new String(buffer, 0, count, "utf-8");
-                                        Log.d(TAG, "buffer: " + str);
-                                        if (str.equals("准备接收数据")) {
-                                            Log.d(TAG, "接收到数据。。。: ");
+    private void connectToServer(){
+        Log.d(TAG, "connectToServer: ");
+
+        connectionCount=0;
+
+        if (ConnectionInfoCollector.getBluetoothDeviceModelList().isEmpty()){
+            Log.d(TAG, "开始  连接 单个 蓝牙: ");
+
+            startConnectedThread();
+        }else {
+            //TODO mohuaiyuan 20171030 连接多个 蓝牙
+            Log.d(TAG, "开始  连接 多个 蓝牙: ");
+            int size=ConnectionInfoCollector.getBluetoothDeviceModelList().size();
+            List<BluetoothDevice> temp=new ArrayList<>();
+
+            for (int i=0;i<size;i++){
+                BluetoothDevice device=ConnectionInfoCollector.getBluetoothDeviceModelList().get(i).getDevice();
+                temp.add(device);
+            }
+            startConnectedThread(temp);
+        }
+    }
+
+
+    ConnectThread.ConnectThreadInterface connectThreadInterface=new ConnectThread.ConnectThreadInterface() {
+        @Override
+        public void connected(BluetoothSocket bluetoothSocket, BluetoothDevice bluetoothDevice) {
+            Log.d(TAG, " ConnectThread.ConnectThreadInterface connected: ");
+            try {
+                outputStream = bluetoothSocket.getOutputStream();
+                inputStream = bluetoothSocket.getInputStream();
+
+                outputStreamList.add(outputStream);
+                inputStreamList.add(inputStream);
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        try {
+                            while (true) {
+                                if (inputStream != null) {
+                                    Log.d(TAG, "inputStream!=null: ");
+                                    byte[] buffer = new byte[128];
+                                    // 每次读取128字节，并保存其读取的角标
+                                    int count = inputStream.read(buffer);
+                                    String str = new String(buffer, 0, count, "utf-8");
+                                    Log.d(TAG, "buffer: " + str);
+                                    if (str.equals("准备接收数据")) {
+
+                                        connectionCount++;
+                                        Log.d(TAG, "接收到数据。。。: ");
+
+                                        if (ConnectionInfoCollector.getBluetoothDeviceModelList().isEmpty()){
+                                            Log.d(TAG, "当个蓝牙已经连接: ");
+                                            Log.d(TAG, "设置 recycleView 可见。。。: ");
                                             Message message=new Message();
                                             message.what=Constants.VIEW_VISIBLE;
                                             myHandler.sendMessage(message);
                                             break;
+                                        }else {
+
+                                            if (connectionCount==ConnectionInfoCollector.getBluetoothDeviceModelList().size()){
+                                                Log.d(TAG, "多个蓝牙都 已经连接。。。");
+                                                Log.d(TAG, "设置 recycleView 可见。。。: ");
+                                                Message message=new Message();
+                                                message.what=Constants.VIEW_VISIBLE;
+                                                myHandler.sendMessage(message);
+                                                break;
+                                            }
+
                                         }
+
+
                                     }
                                 }
-                            } catch (IOException e) {
-                                e.printStackTrace();
                             }
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
-                    }).start();
+                    }
+                }).start();
 
-                    //mohuaiyuan 20171025
+                //mohuaiyuan 20171025
 //                    while (true) {
 //                        if (inputStream != null) {
 //                            Log.d(TAG, "inputStream!=null: ");
@@ -432,21 +489,23 @@ public class MainActivity extends AppCompatActivity {
 //                    }
 
 
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        };
+        }
+    };
+
+
+    private void startConnectedThread(){
+        Log.d(TAG, "startConnectedThread: ");
 
         communication.startConnectedThread(bluetoothDevice,connectThreadInterface);
 
     }
 
-    private void startConnectedThread(BluetoothDevice bluetoothDevice){
-        Log.d(TAG, "startConnectedThread: ");
-        this.bluetoothDevice=bluetoothDevice;
-        startConnectedThread();
-
+    private void startConnectedThread(List<BluetoothDevice> bluetoothDeviceList){
+        Log.d(TAG, "startConnectedThread(List<BluetoothDevice> bluetoothDeviceList): ");
+        communication.startConnectedThread(bluetoothDeviceList,connectThreadInterface);
     }
     
     private void prepareGetBondedDevices(){

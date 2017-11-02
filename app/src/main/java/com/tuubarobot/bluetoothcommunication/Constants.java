@@ -20,4 +20,6 @@ public class Constants {
     public static final int VIEW_INVISIBLE=64646;
     public static final int VIEW_GONE=325482;
 
+    public static final String  SEPARATOR_BETWEEN_SPEECH_AND_ACTION="#,#";
+
 }

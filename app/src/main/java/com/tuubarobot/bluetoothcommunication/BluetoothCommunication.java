@@ -8,6 +8,7 @@ import android.util.Log;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,7 +23,11 @@ public class BluetoothCommunication {
     private ConnectThread connectThread;
     private AcceptThread acceptThread;
 
+    private List<ConnectThread> connectThreadList;
+
     private BluetoothDevice mDevice;
+
+    private List<BluetoothDevice> mbluetoothDeviceList;
 
     public BluetoothCommunication(){
 
@@ -44,6 +49,30 @@ public class BluetoothCommunication {
         }
         connectThread.start();
     }
+
+    /**
+     * 客户端线程
+     * @param bluetoothDeviceList
+     * @param connectThreadInterface
+     */
+    public void startConnectedThread(List<BluetoothDevice> bluetoothDeviceList,ConnectThread.ConnectThreadInterface connectThreadInterface){
+        Log.d(TAG, "startConnectedThread: ");
+        this.mbluetoothDeviceList=bluetoothDeviceList;
+        if (connectThreadList==null){
+            connectThreadList=new ArrayList<>();
+        }
+
+        for (int i=0;i<mbluetoothDeviceList.size();i++){
+            connectThread=new ConnectThread(mDevice);
+            if (connectThreadInterface!=null){
+                connectThread.setConnectThreadInterface(connectThreadInterface);
+            }
+            connectThread.start();
+            connectThreadList.add(connectThread);
+        }
+
+    }
+
 
 
 
@@ -81,11 +110,35 @@ public class BluetoothCommunication {
         this.connectThread = connectThread;
     }
 
+    public List<ConnectThread> getConnectThreadList() {
+        return connectThreadList;
+    }
+
+    public void setConnectThreadList(List<ConnectThread> connectThreadList) {
+        this.connectThreadList = connectThreadList;
+    }
+
     public AcceptThread getAcceptThread() {
         return acceptThread;
     }
 
     public void setAcceptThread(AcceptThread acceptThread) {
         this.acceptThread = acceptThread;
+    }
+
+    public void cancleConnectThread() {
+        if (connectThread!=null){
+            connectThread.cancel();
+            connectThread=null;
+        }
+    }
+
+    public void cancleAllConnectThread() {
+        for (int i=0;i<connectThreadList.size();i++){
+            if (connectThreadList.get(i)!=null){
+                connectThreadList.get(i).cancel();
+                connectThreadList.set(i,null);
+            }
+        }
     }
 }
