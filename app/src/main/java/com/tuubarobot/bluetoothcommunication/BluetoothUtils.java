@@ -1,9 +1,11 @@
 package com.tuubarobot.bluetoothcommunication;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 
 import java.lang.reflect.Method;
+import java.util.UUID;
 
 /**
  * Created by YF-04 on 2017/10/13.
@@ -12,6 +14,12 @@ import java.lang.reflect.Method;
 public class BluetoothUtils {
 
     private   String TAG = "BluetoothUtils";
+
+
+    public   static String My_UUID="00001101-0000-1000-8000-MAC";
+
+    public static  UUID SERVICE_UUID;
+
     private BluetoothAdapter mBluetoothAdapter;
 
 
@@ -113,4 +121,46 @@ public class BluetoothUtils {
     public void setTAG(String TAG) {
         this.TAG = TAG;
     }
+
+    public String getMac(){
+        Log.d(TAG, "getMac: ");
+        return mBluetoothAdapter.getAddress();
+    }
+
+    public UUID createServerUUID(){
+        Log.d(TAG, "createServerUUID: ");
+        String mac=getMac();
+        if (mac==null){
+            return null;
+        }
+        mac=mac.trim();
+        Log.d(TAG, "bluetooth mac: "+mac);
+        if (mac.contains(":")){
+            mac=mac.replace(":","");
+        }
+        Log.d(TAG, "bluetooth mac: "+mac);
+        String uuidString=My_UUID.replace("MAC",mac);
+        SERVICE_UUID= UUID.fromString(uuidString);
+        return SERVICE_UUID;
+    }
+
+
+    public UUID createClientUUID(BluetoothDevice bluetoothDevice){
+        Log.d(TAG, "createClientUUID: ");
+        if (bluetoothDevice==null || bluetoothDevice.getAddress()==null){
+            return null;
+        }
+        String mac=bluetoothDevice.getAddress();
+        mac=mac.trim();
+        Log.d(TAG, "bluetooth mac: "+mac);
+        if (mac.contains(":")){
+            mac=mac.replace(":","");
+        }
+        Log.d(TAG, "bluetooth mac: "+mac);
+        String uuidString=My_UUID.replace("MAC",mac);
+        SERVICE_UUID= UUID.fromString(uuidString);
+        return SERVICE_UUID;
+
+    }
+
 }

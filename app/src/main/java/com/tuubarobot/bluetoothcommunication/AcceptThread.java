@@ -10,6 +10,9 @@ import android.util.Log;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -21,7 +24,6 @@ public class AcceptThread extends Thread {
 
     private final String NAME = "Bluetooth_Socket";
 
-    public static  final UUID SERVICE_UUID= UUID.fromString(BluetoothCommunication.My_UUID) ;
 
     private BluetoothAdapter mBluetoothAdapter;
 
@@ -30,11 +32,15 @@ public class AcceptThread extends Thread {
 
 
     private boolean isLoop=false;
+    private BluetoothUtils bluetoothUtils;
+    private List<BluetoothSocket> bluetoothSocketList;
 
     public AcceptThread() {
         Log.d(TAG, "AcceptThread: ");
         if (mBluetoothAdapter==null){
             mBluetoothAdapter= BluetoothAdapter.getDefaultAdapter();
+            bluetoothUtils=new BluetoothUtils();
+            bluetoothSocketList=new ArrayList<>();
         }
     }
 
@@ -44,7 +50,9 @@ public class AcceptThread extends Thread {
 
         try {
             // 通过UUID监听请求，然后获取到对应的服务端接口
-            serverSocket = mBluetoothAdapter.listenUsingRfcommWithServiceRecord(NAME, SERVICE_UUID);
+            UUID uuid=bluetoothUtils.createServerUUID();
+            Log.d(TAG, " Server uuid: "+uuid);
+            serverSocket = mBluetoothAdapter.listenUsingRfcommWithServiceRecord(NAME,uuid);
 
             isLoop=true;
             while(isLoop && !Thread.interrupted()){
@@ -52,6 +60,8 @@ public class AcceptThread extends Thread {
                 // 接收其客户端的接口
                 socket = serverSocket.accept();
                 Log.d(TAG, "socket==null: "+(socket==null));
+
+                bluetoothSocketList.add(socket);
 
                 ServerThread serverThread=new ServerThread(socket);
 
@@ -141,6 +151,22 @@ public class AcceptThread extends Thread {
         }
     }
 
+    public void closeAll(){
+        Log.d(TAG, "closeAll: ");
+        for (int i=0;i<bluetoothSocketList.size();i++){
+            try {
+                if (bluetoothSocketList.get(i)!=null){
+                    bluetoothSocketList.get(i).close();
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "closeAll 出现 IOException e: " +e.getMessage());
+                e.printStackTrace();
+            }
+
+        }
+
+    }
+
     class ServerThread extends Thread{
 
         private BluetoothSocket bluetoothSocket;
@@ -177,9 +203,9 @@ public class AcceptThread extends Thread {
 
                     outputStream.write("准备接收数据".getBytes());
 
-                    // 创建一个128字节的缓冲
+                    // 创建一个N字节的缓冲
                     byte[] buffer = new byte[1024];
-                    // 每次读取128字节，并保存其读取的角标
+                    // 每次读取N字节，并保存其读取的角标
                     if (inputStream!=null){
                         int count = inputStream.read(buffer);
                         // 创建Message类，向handler发送数据
@@ -196,9 +222,10 @@ public class AcceptThread extends Thread {
                 inputStream.close();
                 bluetoothSocket.close();
             } catch (IOException e) {
-                Log.d(TAG, "读数据线程中出现 IOException ");
+                Log.e(TAG, "读数据线程中出现 IOException ");
 
                 Log.e(TAG, "IOException e: "+e.getMessage());
+                closeAll();
                 e.printStackTrace();
             }
 
