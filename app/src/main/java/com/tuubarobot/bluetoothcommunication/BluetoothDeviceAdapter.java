@@ -121,8 +121,25 @@ public class BluetoothDeviceAdapter extends RecyclerView.Adapter<BluetoothDevice
 
         holder.name.setText("蓝牙名称："+deviceModel.getDevice().getName());
         holder.address.setText("蓝牙地址："+deviceModel.getDevice().getAddress());
-        holder.boundState.setText("绑定状态："+deviceModel.getDevice().getBondState());
+
+        int bondState=deviceModel.getDevice().getBondState();
+        String bondString="";
+        if (bondState==BluetoothDevice.BOND_BONDED){
+            bondString="已经配对";
+        }else if (bondState==BluetoothDevice.BOND_NONE){
+            bondString="未 配对";
+        }else {
+            bondString="未知状态";
+        }
+        holder.boundState.setText("绑定状态："+bondString);
+
         holder.selectedState.setChecked(deviceModel.isSelectState());
+        //若未配对，则不显示
+        if (bondState!=BluetoothDevice.BOND_BONDED){
+            holder.selectedState.setVisibility(View.GONE);
+        }else {
+            holder.selectedState.setVisibility(View.VISIBLE);
+        }
 
     }
 

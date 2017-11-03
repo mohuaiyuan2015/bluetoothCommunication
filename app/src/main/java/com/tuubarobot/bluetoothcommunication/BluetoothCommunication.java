@@ -60,10 +60,13 @@ public class BluetoothCommunication {
         this.mbluetoothDeviceList=bluetoothDeviceList;
         if (connectThreadList==null){
             connectThreadList=new ArrayList<>();
+        }else if (!connectThreadList.isEmpty()){
+            connectThreadList.clear();
         }
 
         for (int i=0;i<mbluetoothDeviceList.size();i++){
-            connectThread=new ConnectThread(mDevice);
+            BluetoothDevice device=mbluetoothDeviceList.get(i);
+            connectThread=new ConnectThread(device);
             if (connectThreadInterface!=null){
                 connectThread.setConnectThreadInterface(connectThreadInterface);
             }

@@ -65,4 +65,6 @@
     </string-array>
     <string name="title_activity_index">IndexActivity</string>
 
+    <string name="connectReminder">Please select a device first!</string>
+
 </resources>

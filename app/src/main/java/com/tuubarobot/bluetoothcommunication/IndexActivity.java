@@ -156,8 +156,13 @@ public class IndexActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, " connectBtn.setOnClickListener onClick: ");
-                Intent intent=new Intent(context,MainActivity.class);
-                context.startActivity(intent);
+                if (ConnectionInfoCollector.getBluetoothDeviceModelList().isEmpty()){
+                    Toast.makeText(context, context.getString(R.string.connectReminder), Toast.LENGTH_SHORT).show();
+
+                }else {
+                    Intent intent=new Intent(context,MainActivity.class);
+                    context.startActivity(intent);
+                }
             }
         });
 

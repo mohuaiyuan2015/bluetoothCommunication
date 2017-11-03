@@ -198,7 +198,14 @@ public class MainActivity extends AppCompatActivity {
                 //mohuaiyuan 20171025  暂时注释
 //                recyclerView.setVisibility(View.VISIBLE);
                 Log.d(TAG, "connnectInfo size: "+ConnectionInfoCollector.getBluetoothDeviceModelList().size());
-               connectToServer();
+                if (connectionCount!=0){
+                    Message message=new Message();
+                    message.what=Constants.VIEW_GONE;
+                    myHandler.sendMessage(message);
+                    reStartConnectThread();
+                }else {
+                    connectToServer();
+                }
 
             }
         });
@@ -392,7 +399,15 @@ public class MainActivity extends AppCompatActivity {
     private void connectToServer(){
         Log.d(TAG, "connectToServer: ");
 
+        //init envirment
         connectionCount=0;
+        if (!outputStreamList.isEmpty()){
+            outputStreamList.clear();
+        }
+        if (!inputStreamList.isEmpty()){
+            inputStreamList.clear();
+        }
+
 
         if (ConnectionInfoCollector.getBluetoothDeviceModelList().isEmpty()){
             Log.d(TAG, "开始  连接 单个 蓝牙: ");
@@ -628,4 +643,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy: ");
+        if (ConnectionInfoCollector.getBluetoothDeviceModelList().isEmpty()){
+            communication.cancleConnectThread();
+        }else {
+            communication.cancleAllConnectThread();
+        }
+
+    }
 }
