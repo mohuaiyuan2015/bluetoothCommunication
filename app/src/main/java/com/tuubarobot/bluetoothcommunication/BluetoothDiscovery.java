@@ -61,6 +61,11 @@ public class BluetoothDiscovery {
         }
     }
 
+    public void stopDiscovery(){
+        Log.d(TAG, "stopDiscovery: ");
+        mBluetoothAdapter.cancelDiscovery();
+    }
+
 
     public final static int MSG_STOP_SCAN      = 0xc06;//停止扫描
     private Handler mHandler=new Handler(){

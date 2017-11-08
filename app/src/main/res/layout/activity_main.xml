@@ -41,6 +41,14 @@
         android:text="get debug Msg"
         />
 
+    <Button
+        android:id="@+id/changeRecycleVisible"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="changeRecycleVisible"
+        android:textAllCaps="false"
+        />
+
 
     <EditText
         android:id="@+id/sendMesssageEditText"

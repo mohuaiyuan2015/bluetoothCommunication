@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by YF-04 on 2017/10/13.
@@ -29,7 +31,11 @@ public class BluetoothCommunication {
 
     private List<BluetoothDevice> mbluetoothDeviceList;
 
+    private ExecutorService installPool;
+
     public BluetoothCommunication(){
+        //初始化 线程池
+        installPool = Executors. newSingleThreadExecutor();
 
     }
 
@@ -55,7 +61,7 @@ public class BluetoothCommunication {
      * @param bluetoothDeviceList
      * @param connectThreadInterface
      */
-    public void startConnectedThread(List<BluetoothDevice> bluetoothDeviceList,ConnectThread.ConnectThreadInterface connectThreadInterface){
+    public void startConnectedThread(List<BluetoothDevice> bluetoothDeviceList, final ConnectThread.ConnectThreadInterface connectThreadInterface){
         Log.d(TAG, "startConnectedThread: ");
         this.mbluetoothDeviceList=bluetoothDeviceList;
         if (connectThreadList==null){
@@ -65,13 +71,25 @@ public class BluetoothCommunication {
         }
 
         for (int i=0;i<mbluetoothDeviceList.size();i++){
-            BluetoothDevice device=mbluetoothDeviceList.get(i);
+            final BluetoothDevice device=mbluetoothDeviceList.get(i);
+
             connectThread=new ConnectThread(device);
             if (connectThreadInterface!=null){
                 connectThread.setConnectThreadInterface(connectThreadInterface);
             }
-            connectThread.start();
             connectThreadList.add(connectThread);
+            connectThread.start();
+
+//            installPool.execute(new Runnable() {
+//                @Override
+//                public void run() {
+//                    synchronized (this){
+//
+//                    }
+//
+//                }
+//            });
+
         }
 
     }

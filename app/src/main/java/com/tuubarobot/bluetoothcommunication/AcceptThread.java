@@ -173,6 +173,8 @@ public class AcceptThread extends Thread {
         private InputStream inputStream;// 获取到输入流
         private OutputStream outputStream;// 获取到输出流
 
+        private boolean isLoop;
+
         public ServerThread(BluetoothSocket bluetoothSocket){
             Log.d(TAG, "ServerThread: ");
             this.bluetoothSocket=bluetoothSocket;
@@ -181,6 +183,9 @@ public class AcceptThread extends Thread {
                 inputStream = bluetoothSocket.getInputStream();
                 // 获取到输出流
                 outputStream = bluetoothSocket.getOutputStream();
+
+                isLoop=true;
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -200,8 +205,10 @@ public class AcceptThread extends Thread {
 
                 while (bluetoothSocket.isConnected()){
                     Log.d(TAG, "读数据。。。");
-
-                    outputStream.write("准备接收数据".getBytes());
+                    if (isLoop){
+                        outputStream.write("准备接收数据".getBytes());
+                        isLoop=false;
+                    }
 
                     // 创建一个N字节的缓冲
                     byte[] buffer = new byte[1024];

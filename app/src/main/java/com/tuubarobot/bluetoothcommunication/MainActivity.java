@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
     private Button startClientThread;
     private Button startDiscovery;
     private Button getDebugMsgBtn;
+    private Button changeRecycleVisible;
 
     private RecyclerView recyclerView;
     private RecyclerView deviceRecyclerView;
@@ -72,8 +73,8 @@ public class MainActivity extends AppCompatActivity {
     private BluetoothCommunication communication;
     private BluetoothDevice bluetoothDevice;
 
-    private OutputStream outputStream;
-    private InputStream inputStream;
+    private OutputStream mOutputStream;
+    private InputStream mInputStream;
 
     private List<OutputStream> outputStreamList;
     private List<InputStream> inputStreamList;
@@ -268,8 +269,24 @@ public class MainActivity extends AppCompatActivity {
                 int osSize=outputStreamList.size();
                 Log.d(TAG, "outputStreamList.size(): "+isSize);
                 Log.d(TAG, "------------------------------------------------------: ");
+                Log.d(TAG, "connectionCount: "+connectionCount);
 
 
+
+            }
+        });
+
+        changeRecycleVisible.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "changeRecycleVisible.setOnClickListener onClick: ");
+                Message message=new Message();
+                if (recyclerView.getVisibility()==View.GONE){
+                    message.what= Constants.VIEW_VISIBLE;
+                }else{
+                    message.what=Constants.VIEW_GONE;
+                }
+                myHandler.sendMessage(message);
             }
         });
 
@@ -314,6 +331,7 @@ public class MainActivity extends AppCompatActivity {
         send= (Button) findViewById(R.id.send);
         startDiscovery= (Button) findViewById(R.id.startDiscovery);
         getDebugMsgBtn= (Button) findViewById(R.id.getDebugMsgBtn);
+        changeRecycleVisible= (Button) findViewById(R.id.changeRecycleVisible);
         recyclerView= (RecyclerView) findViewById(R.id.orderRecyclerView);
         deviceRecyclerView= (RecyclerView) findViewById(R.id.deviceRecyclerView);
     }
@@ -321,7 +339,7 @@ public class MainActivity extends AppCompatActivity {
     private void write(byte[] array){
         Log.d(TAG, "write(byte[] array): ");
         try {
-            outputStream.write(array);
+            mOutputStream.write(array);
         } catch (IOException e) {
             Log.d(TAG, "发送数据 出现 IOException e:"+e.getMessage());
             e.printStackTrace();
@@ -432,81 +450,9 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void connected(BluetoothSocket bluetoothSocket, BluetoothDevice bluetoothDevice) {
             Log.d(TAG, " ConnectThread.ConnectThreadInterface connected: ");
-            try {
-                outputStream = bluetoothSocket.getOutputStream();
-                inputStream = bluetoothSocket.getInputStream();
-
-                outputStreamList.add(outputStream);
-                inputStreamList.add(inputStream);
-
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        try {
-                            while (true) {
-                                if (inputStream != null) {
-                                    Log.d(TAG, "inputStream!=null: ");
-                                    byte[] buffer = new byte[128];
-                                    // 每次读取128字节，并保存其读取的角标
-                                    int count = inputStream.read(buffer);
-                                    String str = new String(buffer, 0, count, "utf-8");
-                                    Log.d(TAG, "buffer: " + str);
-                                    if (str.equals("准备接收数据")) {
-
-                                        connectionCount++;
-                                        Log.d(TAG, "接收到数据。。。: ");
-
-                                        if (ConnectionInfoCollector.getBluetoothDeviceModelList().isEmpty()){
-                                            Log.d(TAG, "当个蓝牙已经连接: ");
-                                            Log.d(TAG, "设置 recycleView 可见。。。: ");
-                                            Message message=new Message();
-                                            message.what=Constants.VIEW_VISIBLE;
-                                            myHandler.sendMessage(message);
-                                            break;
-                                        }else {
-
-                                            if (connectionCount==ConnectionInfoCollector.getBluetoothDeviceModelList().size()){
-                                                Log.d(TAG, "多个蓝牙都 已经连接。。。");
-                                                Log.d(TAG, "设置 recycleView 可见。。。: ");
-                                                Message message=new Message();
-                                                message.what=Constants.VIEW_VISIBLE;
-                                                myHandler.sendMessage(message);
-                                                break;
-                                            }
-
-                                        }
-
-
-                                    }
-                                }
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }).start();
-
-                //mohuaiyuan 20171025
-//                    while (true) {
-//                        if (inputStream != null) {
-//                            Log.d(TAG, "inputStream!=null: ");
-//                            byte[] buffer = new byte[128];
-//                            // 每次读取128字节，并保存其读取的角标
-//                            int count = inputStream.read(buffer);
-//                            String str = new String(buffer, 0, count, "utf-8");
-//                            Log.d(TAG, "buffer: " + str);
-//                            if (str.equals("准备接收数据")) {
-//                                Log.d(TAG, "接收到数据。。。: ");
-//                                break;
-//                            }
-//                        }
-//                    }
-
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            
+            ClientThread clientThread=new ClientThread(bluetoothSocket);
+            clientThread.start();
         }
     };
 
@@ -643,6 +589,95 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    class ClientThread extends Thread{
+
+        private BluetoothSocket mBluetoothSocket;
+        private InputStream inputStream;// 获取到输入流
+        private OutputStream outputStream;// 获取到输出流
+        //mohuaiyuan 暂时先注释
+//        private  boolean isLoop;
+
+        public ClientThread(BluetoothSocket bluetoothSocket){
+            Log.d(TAG, "ClientThread: ");
+            this.mBluetoothSocket=bluetoothSocket;
+            Log.d(TAG, "mBluetoothSocket.getRemoteDevice().getAddress(): "+mBluetoothSocket.getRemoteDevice().getAddress());
+
+            try {
+                // 获取到输入流
+                mInputStream= inputStream = mBluetoothSocket.getInputStream();
+                // 获取到输出流
+               mOutputStream= outputStream = mBluetoothSocket.getOutputStream();
+
+                outputStreamList.add(outputStream);
+                inputStreamList.add(inputStream);
+                //mohuaiyuan 暂时先注释
+//                isLoop=true;
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            Log.d(TAG, "准备接收数据: ");
+            Log.d(TAG, "Client 获取到输入流 inputStream: "+inputStream);
+            Log.d(TAG, "Client 获取到输出流 outputStream: "+outputStream);
+        }
+
+        @Override
+        public void run() {
+            super.run();
+            try {
+                Log.d(TAG, "开始的值 connectionCount: "+connectionCount);
+                while (true) {
+                    if (inputStream != null) {
+                        Log.d(TAG, "inputStream!=null: ");
+                        byte[] buffer = new byte[128];
+                        // 每次读取128字节，并保存其读取的角标
+                        int count = inputStream.read(buffer);
+                        String str = new String(buffer, 0, count, "utf-8");
+                        Log.d(TAG, "buffer: " + str);
+                        if (str.equals("准备接收数据")) {
+                            //mohuaiyuan 暂时先注释
+//                            isLoop=false;
+//                            connectCountIncrease();
+                            connectionCount++;
+
+                            Log.d(TAG, "改变之后的值 connectionCount: "+connectionCount);
+                            Log.d(TAG, "接收到数据。。。: ");
+
+                            if (ConnectionInfoCollector.getBluetoothDeviceModelList().isEmpty()) {
+                                Log.d(TAG, "当个蓝牙已经连接: ");
+                                Log.d(TAG, "设置 recycleView 可见。。。: ");
+                                Message message = new Message();
+                                message.what = Constants.VIEW_VISIBLE;
+                                myHandler.sendMessage(message);
+                                break;
+                            } else {
+
+                                if (connectionCount == ConnectionInfoCollector.getBluetoothDeviceModelList().size()) {
+                                    Log.d(TAG, "多个蓝牙都 已经连接。。。");
+                                    Log.d(TAG, "设置 recycleView 可见。。。: ");
+                                    Message message = new Message();
+                                    message.what = Constants.VIEW_VISIBLE;
+                                    myHandler.sendMessage(message);
+                                    break;
+                                }
+
+                            }
+
+
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    private synchronized void connectCountIncrease() {
+        connectionCount++;
+    }
 
     @Override
     protected void onDestroy() {

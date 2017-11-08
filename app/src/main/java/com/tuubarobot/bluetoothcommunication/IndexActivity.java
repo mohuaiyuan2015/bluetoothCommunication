@@ -90,7 +90,7 @@ public class IndexActivity extends AppCompatActivity {
 
         //方式二
         //mohuaiyuan 扫描蓝牙
-        startDiscovery();
+//        startDiscovery();
     }
 
     @Override
@@ -98,6 +98,13 @@ public class IndexActivity extends AppCompatActivity {
         super.onRestart();
         Log.d(TAG, "onRestart: ");
         ConnectionInfoCollector.clearDeviceModelList();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop: ");
+        bluetoothDiscovery.stopDiscovery();
     }
 
     private void initData() {
@@ -398,6 +405,8 @@ public class IndexActivity extends AppCompatActivity {
         }
         bluetoothDiscovery.startDiscovery();
     }
+
+
 
 
 }
