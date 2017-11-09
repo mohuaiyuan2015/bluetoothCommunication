@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
     private Button startClientThread;
     private Button startDiscovery;
     private Button getDebugMsgBtn;
-    private Button changeRecycleVisible;
+//    private Button changeRecycleVisible;
 
     private RecyclerView recyclerView;
     private RecyclerView deviceRecyclerView;
@@ -276,19 +276,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        changeRecycleVisible.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG, "changeRecycleVisible.setOnClickListener onClick: ");
-                Message message=new Message();
-                if (recyclerView.getVisibility()==View.GONE){
-                    message.what= Constants.VIEW_VISIBLE;
-                }else{
-                    message.what=Constants.VIEW_GONE;
-                }
-                myHandler.sendMessage(message);
-            }
-        });
+//        changeRecycleVisible.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Log.d(TAG, "changeRecycleVisible.setOnClickListener onClick: ");
+//                Message message=new Message();
+//                if (recyclerView.getVisibility()==View.GONE){
+//                    message.what= Constants.VIEW_VISIBLE;
+//                }else{
+//                    message.what=Constants.VIEW_GONE;
+//                }
+//                myHandler.sendMessage(message);
+//            }
+//        });
 
         myAdapter.setOnItemClickListener(new MyAdapter.OnItemClickListener() {
             @Override
@@ -310,6 +310,8 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "给 多个蓝牙发送数据：");
                     write(outputStreamList,String.valueOf(data).getBytes());
                 }
+                //震动
+                bluetoothUtils.vibrate(context,40);
 
             }
         });
@@ -331,7 +333,7 @@ public class MainActivity extends AppCompatActivity {
         send= (Button) findViewById(R.id.send);
         startDiscovery= (Button) findViewById(R.id.startDiscovery);
         getDebugMsgBtn= (Button) findViewById(R.id.getDebugMsgBtn);
-        changeRecycleVisible= (Button) findViewById(R.id.changeRecycleVisible);
+//        changeRecycleVisible= (Button) findViewById(R.id.changeRecycleVisible);
         recyclerView= (RecyclerView) findViewById(R.id.orderRecyclerView);
         deviceRecyclerView= (RecyclerView) findViewById(R.id.deviceRecyclerView);
     }
@@ -393,7 +395,8 @@ public class MainActivity extends AppCompatActivity {
 
             }
         };
-        handler.postDelayed(runnable,2000);
+        handler.postDelayed(runnable,500);
+//        handler.post(runnable);
 
     }
 

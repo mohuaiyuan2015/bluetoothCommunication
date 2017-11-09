@@ -2,6 +2,8 @@ package com.tuubarobot.bluetoothcommunication;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
+import android.os.Vibrator;
 import android.util.Log;
 
 import java.lang.reflect.Method;
@@ -22,13 +24,25 @@ public class BluetoothUtils {
 
     private BluetoothAdapter mBluetoothAdapter;
 
-
+    private static Vibrator vibrator;
 
 
     public BluetoothUtils(){
         if (mBluetoothAdapter==null){
             mBluetoothAdapter=BluetoothAdapter.getDefaultAdapter();
         }
+    }
+
+    /**
+     * 震动
+     * @param context
+     * @param milliseconds :震动的时间（毫秒：ms）
+     */
+    public void vibrate(Context context,long milliseconds){
+        if (vibrator==null){
+            vibrator = (Vibrator) context.getSystemService(context.VIBRATOR_SERVICE);
+        }
+        vibrator.vibrate(milliseconds);
     }
 
     /**

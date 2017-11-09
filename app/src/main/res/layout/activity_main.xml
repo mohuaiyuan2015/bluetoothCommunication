@@ -39,6 +39,7 @@
         android:layout_height="wrap_content"
         android:textAllCaps="false"
         android:text="get debug Msg"
+        android:visibility="gone"
         />
 
     <Button
@@ -47,6 +48,7 @@
         android:layout_height="wrap_content"
         android:text="changeRecycleVisible"
         android:textAllCaps="false"
+        android:visibility="gone"
         />
 
 

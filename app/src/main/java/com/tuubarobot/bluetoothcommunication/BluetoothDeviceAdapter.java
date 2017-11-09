@@ -135,11 +135,11 @@ public class BluetoothDeviceAdapter extends RecyclerView.Adapter<BluetoothDevice
 
         holder.selectedState.setChecked(deviceModel.isSelectState());
         //若未配对，则不显示
-        if (bondState!=BluetoothDevice.BOND_BONDED){
-            holder.selectedState.setVisibility(View.GONE);
-        }else {
-            holder.selectedState.setVisibility(View.VISIBLE);
-        }
+//        if (bondState!=BluetoothDevice.BOND_BONDED){
+//            holder.selectedState.setVisibility(View.GONE);
+//        }else {
+//            holder.selectedState.setVisibility(View.VISIBLE);
+//        }
 
     }
 

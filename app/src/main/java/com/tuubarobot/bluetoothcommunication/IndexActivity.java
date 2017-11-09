@@ -90,7 +90,7 @@ public class IndexActivity extends AppCompatActivity {
 
         //方式二
         //mohuaiyuan 扫描蓝牙
-//        startDiscovery();
+        startDiscovery();
     }
 
     @Override
@@ -239,6 +239,9 @@ public class IndexActivity extends AppCompatActivity {
                     }
 
                 }
+                //震动
+                bluetoothUtils.vibrate(context,40);
+
 
             }
         });

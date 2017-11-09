@@ -27,7 +27,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAllCaps="false"
-        android:text="get Debug Info"/>
+        android:text="get Debug Info"
+        android:visibility="gone"
+        />
 
     <Button
         android:id="@+id/connectBtn"
@@ -35,6 +37,7 @@
         android:layout_height="wrap_content"
         android:textAllCaps="false"
         android:text="connect"
+        android:visibility="gone"
         />
 
 

@@ -30,7 +30,9 @@
         android:id="@+id/selectedState"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="选中状态"/>
+        android:text="选中状态"
+        android:visibility="gone"
+        />
 
     <View
         android:layout_width="match_parent"
