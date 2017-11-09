@@ -52,7 +52,7 @@ public class ConnectThread extends Thread {
         Log.d(TAG, "ConnectThread  run: ");
 
         // Always cancel discovery because it will slow down a connection
-        bluetoothAdapter.cancelDiscovery();
+//        bluetoothAdapter.cancelDiscovery();
         
         try {
             // socket 连接,该调用会阻塞，直到连接成功或失败

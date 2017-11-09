@@ -340,6 +340,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "write(byte[] array): ");
         try {
             mOutputStream.write(array);
+            mOutputStream.flush();
         } catch (IOException e) {
             Log.d(TAG, "发送数据 出现 IOException e:"+e.getMessage());
             e.printStackTrace();
@@ -357,6 +358,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "write(OutputStream outputStream,byte[] array): ");
         try {
             outputStream.write(array);
+            outputStream.flush();
         } catch (IOException e) {
             Log.d(TAG, "发送数据 出现 IOException e:"+e.getMessage());
             e.printStackTrace();
@@ -382,18 +384,12 @@ public class MainActivity extends AppCompatActivity {
         Runnable runnable=new Runnable() {
             @Override
             public void run() {
-                //mohuaiyuan 单个蓝牙 方式一
                 //关闭原来的连接
                 closeConnection();
 
-                //mohuaiyuan 20171111 连接单个蓝牙 方式一
-                //重新连接
-//                startConnectedThread();
-
-                //mohuaiyuan 20171111 连接多个蓝牙 方式二
+                //mohuaiyuan 20171111 连接多个蓝牙
                 //重新连接
                 connectToServer();
-
 
             }
         };
@@ -595,7 +591,7 @@ public class MainActivity extends AppCompatActivity {
         private InputStream inputStream;// 获取到输入流
         private OutputStream outputStream;// 获取到输出流
         //mohuaiyuan 暂时先注释
-//        private  boolean isLoop;
+        private  boolean isLoop;
 
         public ClientThread(BluetoothSocket bluetoothSocket){
             Log.d(TAG, "ClientThread: ");
@@ -611,7 +607,7 @@ public class MainActivity extends AppCompatActivity {
                 outputStreamList.add(outputStream);
                 inputStreamList.add(inputStream);
                 //mohuaiyuan 暂时先注释
-//                isLoop=true;
+                isLoop=true;
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -625,52 +621,53 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
             super.run();
-            try {
-                Log.d(TAG, "开始的值 connectionCount: "+connectionCount);
-                while (true) {
-                    if (inputStream != null) {
-                        Log.d(TAG, "inputStream!=null: ");
-                        byte[] buffer = new byte[128];
-                        // 每次读取128字节，并保存其读取的角标
-                        int count = inputStream.read(buffer);
-                        String str = new String(buffer, 0, count, "utf-8");
-                        Log.d(TAG, "buffer: " + str);
-                        if (str.equals("准备接收数据")) {
-                            //mohuaiyuan 暂时先注释
-//                            isLoop=false;
+            Log.d(TAG, "ClientThread run: ");
+            synchronized (this){
+                try {
+                    Log.d(TAG, "开始的值 connectionCount: "+connectionCount);
+                    while (isLoop) {
+                        if (inputStream != null) {
+                            Log.d(TAG, "inputStream!=null: ");
+                            byte[] buffer = new byte[128];
+                            // 每次读取128字节，并保存其读取的角标
+                            int count = inputStream.read(buffer);
+                            String str = new String(buffer, 0, count, "utf-8");
+                            Log.d(TAG, "buffer: " + str);
+
+                            isLoop = false;
+                            if (str.equals("准备接收数据")) {
+
 //                            connectCountIncrease();
-                            connectionCount++;
+                                connectionCount++;
 
-                            Log.d(TAG, "改变之后的值 connectionCount: "+connectionCount);
-                            Log.d(TAG, "接收到数据。。。: ");
+                                Log.d(TAG, "改变之后的值 connectionCount: " + connectionCount);
+                                Log.d(TAG, "接收到数据啦。。。: ");
 
-                            if (ConnectionInfoCollector.getBluetoothDeviceModelList().isEmpty()) {
-                                Log.d(TAG, "当个蓝牙已经连接: ");
-                                Log.d(TAG, "设置 recycleView 可见。。。: ");
                                 Message message = new Message();
-                                message.what = Constants.VIEW_VISIBLE;
-                                myHandler.sendMessage(message);
-                                break;
-                            } else {
-
-                                if (connectionCount == ConnectionInfoCollector.getBluetoothDeviceModelList().size()) {
-                                    Log.d(TAG, "多个蓝牙都 已经连接。。。");
+                                if (ConnectionInfoCollector.getBluetoothDeviceModelList().isEmpty()) {
+                                    Log.d(TAG, "当个 蓝牙已经连接: ");
                                     Log.d(TAG, "设置 recycleView 可见。。。: ");
-                                    Message message = new Message();
                                     message.what = Constants.VIEW_VISIBLE;
                                     myHandler.sendMessage(message);
-                                    break;
+                                } else {
+                                    if (connectionCount == ConnectionInfoCollector.getBluetoothDeviceModelList().size()) {
+                                        Log.d(TAG, "多个蓝牙都 已经连接。。。");
+                                        Log.d(TAG, "设置 recycleView 可见。。。: ");
+                                        message.what = Constants.VIEW_VISIBLE;
+                                        myHandler.sendMessage(message);
+                                    }
                                 }
 
+
                             }
-
-
                         }
                     }
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+
             }
+
         }
 
     }

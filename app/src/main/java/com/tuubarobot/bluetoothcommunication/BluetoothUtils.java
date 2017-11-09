@@ -23,6 +23,8 @@ public class BluetoothUtils {
     private BluetoothAdapter mBluetoothAdapter;
 
 
+
+
     public BluetoothUtils(){
         if (mBluetoothAdapter==null){
             mBluetoothAdapter=BluetoothAdapter.getDefaultAdapter();
