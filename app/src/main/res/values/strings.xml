@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">bluetoothCommunication</string>
+    <string name="app_name">订制场景</string>
     <string name="device_ble_not_supported">device ble not supported</string>
 
     <string-array name="orders">
